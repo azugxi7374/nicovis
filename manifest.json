@@ -1,0 +1,17 @@
+{
+        "name": "nicocomvis",
+        "version": "0.0.1",
+        "manifest_version": 2,
+        "page_action": {
+                
+        },
+        "permissions":[
+                "cookies",
+                "*://*.nicovideo.jp/",
+                "webNavigation"
+        ],
+        "background": {
+                "scripts": ["background.js"],
+                "persistent": false
+        }
+}
