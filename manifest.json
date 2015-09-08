@@ -11,7 +11,11 @@
                 "webNavigation"
         ],
         "background": {
-                "scripts": ["background.js"],
+                "scripts": [
+                	"background.js", 
+                	"jquery-2.1.4.min.js",
+                	"underscore-min.js"
+                ],
                 "persistent": false
         }
 }

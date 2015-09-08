@@ -1,41 +1,18 @@
-var prefixURL='www.nicovideo.jp/watch/'
-function flapiURL(id){
-	return "http://flapi.nicovideo.jp/api/getflv/"+id
-}
-function makeMesURL(url, tid, res_from){
-	return url+"thread?version=20090904&thread="+tid+"&res_from=-"+res_from
-}
-var defaultResFrom = 1000
-
+var nicoBaseURL = 'www.nicovideo.jp/watch/'
 
 chrome.webNavigation.onCommitted.addListener(function(e){
-        chrome.pageAction.show(e.tabId)
-        var idx = e.url.indexOf(prefixURL)
-        var videoId = e.url.substring(idx+prefixURL.length)
-        vis(videoId)
-}, {url: [{urlContains: prefixURL}]})
-
+		console.log("ok")
+		chrome.pageAction.show(e.tabId)
+		var idx = e.url.indexOf(nicoBaseURL)
+		var videoId = e.url.substring(idx + nicoBaseURL.length)
+		vis(videoId)
+	}, {url: [{urlContains: nicoBaseURL}]}
+);
 
 function vis(vid){
-        console.log(vid)
-        getFromURL(flapiURL(vid), function(str){
-        	var sp = str.split("&")
-        	var tid = 0
-        	var mesURL = ""
-        	for(var i=0; i<sp.length; i++){
-        		var sp2 = sp[i].split("=")
-        		if(sp2[0] === "thread_id"){
-        			tid = sp2[1]
-        		}else if(sp2[0] === "ms"){
-        			mesURL = sp2[1]
-        		}
-        	}
-        	console.log(tid+", "+ mesURL)
-        
-        	getFromURL(makeMesURL(mesURL, tid, 1000), function(m){
-        		console.log(m)
-        	})
-        })
+	console.log(vid)
+	var nico = new Nico();
+	console.log(nico.getComments(vid, 1000));
 }
 
 //function manageCookie(){
@@ -44,24 +21,58 @@ function vis(vid){
 //        })
 //}
 
+//manageCookie()
 
-function getFromURL(url, callback){
-        console.log(url)
-        var request = new XMLHttpRequest()
-        console.log(request)
-        request.open("GET", url, true)
-        request.onload = function(e){
-                if(request.readyState === 4){
-                        if(request.status === 200){
-                                callback(unescape(request.responseText))
-                        }else{
-                                console.error(request.statusText)
-                        }
-                }
-        }
-        request.send()
+// Model Nico
+var Nico = function(){
+	// const...
+	this.msgVersion = '20090904'
+	this.defautMsgResNum = 1000
 }
 
+Nico.prototype.flapiURL = function(vid){ // (sm9)
+	return "http://flapi.nicovideo.jp/api/getflv/"+vid;
+}
 
-//manageCookie()
+Nico.prototype.msgURL = function(msgServURL, threadID, msgResNum){ // 
+	return msgServURL+"thread?"+
+		"version="+this.msgVersion +
+		"&thread="+threadID+
+		"&res_from=-" + msgResNum;
+}
+	
+// flapiから動画情報取得. 
+// return : Promise { thread_id, ms, ... }
+Nico.prototype.getVideoInfo = function(vid){
+	return $.get(this.flapiURL(vid)).then(function(data){
+		console.log(data)
+		var obj = {};
+		_.each(data.split("&"), function(args){
+				var kv = args.split("=")
+				obj[kv[0]]=kv[1]
+		});
+		console.log("obj = "+ obj)
+		return obj;
+	});
+}
+	
+
+// 動画情報(videoInfo)からコメント取得
+Nico.prototype.getCommentsFromVideoInfo = function(info, num){
+	console.log(info.thread_id)
+	console.log(info.ms)
+	console.log(this.msgURL(info.ms, info.thread_id, num))
+	return $.get(this.msgURL(info.ms, info.thread_id, num));
+};
+
+// getComments(最新N件表示)
+Nico.prototype.getComments = function(vid, num){
+	var self = this
+	return this.getVideoInfo(vid).then(function(info){
+		console.log(info.thread_id)
+		console.log(info.ms)
+		return self.getCommentsFromVideoInfo(info, num)
+	});
+}
+
 
