@@ -10,9 +10,12 @@ chrome.webNavigation.onCommitted.addListener(function(e){
 
 function test(vid){
 	var nico = new Nico();
-	nico.getComments(vid, 1000).then(function(data){
+	nico.getComments(vid, 100).then(function(data){
 		console.log(data)
-	})
+		$(data).find("chat").each(function(){
+			console.log("vpos = " + $(this).attr("vpos"))
+		});
+	});
 }
 
 // Model Nico
