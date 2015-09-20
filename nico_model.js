@@ -31,8 +31,9 @@ NicoPlayer.prototype.getTime = function(){
 	return this.player.ext_getPlayheadTime();
 }
 
+// 長さ
 NicoPlayer.prototype.length = function(){
-	return this.player.ext_getTotalTime();
+	return Math.ceil(this.player.ext_getTotalTime()*1000);
 }
 
 // message, command, vpos, resNo, date
