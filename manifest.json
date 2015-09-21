@@ -31,8 +31,9 @@
         "js/content_scripts.js"
       ],
       "css":[
-        "css/bootstrap-theme.min.css",
-        "css/bootstrap.min.css"
+        //"css/bootstrap-theme.min.css",
+        "css/booooootstrap.css"
+        //"css/bootstrap.min.css"
       ],
       "persistent": false
     }
