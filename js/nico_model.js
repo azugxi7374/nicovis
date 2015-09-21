@@ -1,3 +1,5 @@
+
+
 //////////////////////////////////////////////////
 // コメント、再生
 var NicoPlayer = function(){
@@ -5,6 +7,7 @@ var NicoPlayer = function(){
         "ext_getThreads", "ext_play", "ext_setPlayheadTime", "ext_getPlayheadTime",
         "ext_getTotalTime", "ext_getComments"
     ]
+    this.tempTag = "tmp_nicovis_main_thread_id"; /////
     this.ready = false;
     this.player;
     this.threadId;
@@ -21,9 +24,10 @@ NicoPlayer.prototype.init = function(){
         return; // NG
     }
     this.threadId = this.getMainThreadId();
-    if(this.threadId.length > 0){
-        this.ready = true;
+    if(this.threadId.length == 0){
+        return;
     }
+    this.ready = true;
 }
 
 
@@ -56,9 +60,15 @@ NicoPlayer.prototype.getComments = function(num){
 
 // !!! DOMに依存
 NicoPlayer.prototype.getMainThreadId = function(){
-    var tag = "tmp_nicovis_main_thread_id"; /////
-    d3.select("body").append(tag);
-    d3.select("body").append("script").attr("type", "text/javascript").text(documentHere(function(){// /*
+    this.insertTmpDom();
+    this.player.ext_getThreads('getThreadInfo')
+    var tid = $(this.tempTag).text()
+    return tid;
+};
+
+// insertTmpDom
+NicoPlayer.prototype.insertTmpDom = function(){
+    var script = documentHere(function(){// /*
         var mainThreadId;
         var getThreadInfo = function(param) {
         for (var i = 0, l = param.length; i < l; i++) {
@@ -66,15 +76,17 @@ NicoPlayer.prototype.getMainThreadId = function(){
                     mainThreadId = param[i].id;
                 }
             }
-            var mtag = document.getElementsByTagName("tmp_nicovis_main_thread_id")[0]
+            var mtag = document.getElementsByTagName("***")[0]
             mtag.innerHTML = mainThreadId
         }
         // */
-    }));
-    this.player.ext_getThreads('getThreadInfo')
-    var tid = $(tag).text()
-    return tid;
-};
+    }).replace("***", this.tempTag);
+
+    if(d3.select(this.tempTag).empty()){
+        d3.select("body").append(this.tempTag).style("display","none");
+        d3.select("body").append("script").attr("type", "text/javascript").text(script);
+    }
+}
 
 // あとで
 function onLoadNicoPlayer(callback){
