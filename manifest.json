@@ -31,7 +31,7 @@
         "js/content_scripts.js"
       ],
       "css":[
-        //"css/style.css"
+        "css/style.css"
         //"css/modal.css"
         //"css/bootstrap.min.css"
         //"css/bootstrap-theme.min.css"
