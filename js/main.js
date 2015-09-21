@@ -1,7 +1,7 @@
 var nicoBaseURL = 'www.nicovideo.jp/watch/'
 
 console.log("main.js!");
-(function(){
+window.onload = function(){
 
     setTimeout(function(){
 
@@ -12,7 +12,7 @@ console.log("main.js!");
     //console.log(mainThreadId);
 
     }, 5*1000);
-})();
+};
 
 /*
 chrome.webNavigation.onCommitted.addListener(function(e){

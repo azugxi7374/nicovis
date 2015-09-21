@@ -19,12 +19,12 @@
         "*://*.nicovideo.jp/*"
       ],
       "js": [
-        "jquery-2.1.4.min.js",
-        "underscore-min.js",
-        "d3.min.js",
-        "utils.js",
-        "nico_model.js",
-        "main.js"
+        "js/lib/jquery-2.1.4.min.js",
+        "js/lib/underscore-min.js",
+        "js/lib/d3.min.js",
+        "js/utils.js",
+        "js/nico_model.js",
+        "js/main.js"
       ],
       "persistent": false
     }
