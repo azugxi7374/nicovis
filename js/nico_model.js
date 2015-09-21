@@ -1,20 +1,31 @@
-/*
-var mainThreadId;
-var getThreadInfo = function(param) {
-  for (var i = 0, l = param.length; i < l; i++) {
-    if (param[i].type == 'main') {
-      mainThreadId = param[i].id;
-    }
-  }
-}
-*/
 //////////////////////////////////////////////////
 // コメント、再生
 var NicoPlayer = function(){
-	this.player = $("#external_nicoplayer")[0];
-	this.threadId = this.getMainThreadId();
-	console.log(this.threadId)
+    this.funcList = [
+        "ext_getThreads", "ext_play", "ext_setPlayheadTime", "ext_getPlayheadTime",
+        "ext_getTotalTime", "ext_getComments"
+    ]
+    this.ready = false;
+    this.player;
+    this.threadId;
+
+    this.init();
 };
+
+NicoPlayer.prototype.init = function(){
+    var self = this;
+    self.player = $("#external_nicoplayer")[0];
+    if (this.player === undefined || _.some(self.funcList, function(f){
+        return self.player[f] === undefined
+    })){
+        return; // NG
+    }
+    this.threadId = this.getMainThreadId();
+    if(this.threadId.length > 0){
+        this.ready = true;
+    }
+}
+
 
 // play, stop
 NicoPlayer.prototype.play = function(b){
@@ -60,18 +71,22 @@ NicoPlayer.prototype.getMainThreadId = function(){
         }
         // */
     }));
-
-    // 取得
-    console.log(this.player);
-    //console.log(
     this.player.ext_getThreads('getThreadInfo')
-    //);
     var tid = $(tag).text()
-    console.log("tid", $(tag).text());
     return tid;
 };
 
-
+// あとで
+function onLoadNicoPlayer(callback){
+    var np = new NicoPlayer();
+    if(np.ready){
+        // console.log("np ok!")
+        callback(np);
+    }else{
+        //console.log("wait...")
+        setTimeout(function(){onLoadNicoPlayer(callback)}, 1000);
+    }
+}
 
 
 
