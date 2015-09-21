@@ -7,8 +7,11 @@ function test(){
 	//var values = d3.range(10000).map(d3.random.bates(10));
 	ngraph({
 		//values: values,
-		values: sm9vpos,
-		bin: 100,
+		values: _.filter(sm9vpos, function(d){return d<sm9len}),
+		len: sm9len,
+		bin: 320,
+		w0: 600,
+		h0: 100
 	});
 };
 
@@ -22,23 +25,26 @@ function ngraph(p){
 		h0: 400,
 		bin: 100,
 	});
-	
-	console.log(p)
+	console.log(p);
 
 	var formatCount = d3.format(",.0f");
 	var width = p.w0 - p.margin.left - p.margin.right,
-		height = p.w0 - p.margin.top - p.margin.bottom,
-		len = p.values.length;
-	len = 10000;
+		height = p.h0 - p.margin.top - p.margin.bottom;
 
 	var x = d3.scale.linear()
-				.domain([0, len])
+				.domain([0, p.len])
 				.range([0, width]);
 
 	var data = d3.layout.histogram()
 				.bins(x.ticks(p.bin))
 				(p.values);
+	
+	_.each(data, function(d){
+		d.time = ms2str(d.x)
+	});
+	
 	console.log(data);
+	console.log(x.ticks(p.bin))
 
 	var y = d3.scale.linear()
 				.domain([0, d3.max(data, function(d) { return d.y; })])
@@ -47,13 +53,23 @@ function ngraph(p){
 	var xAxis = d3.svg.axis()
 				.scale(x)
 				.orient("bottom");
+	console.log(xAxis);
 
+	// svg
 	var svg = d3.select("body").append("svg")
 			.attr("width", width + p.margin.left + p.margin.right)
 			.attr("height", height + p.margin.top + p.margin.bottom)
 		.append("g")
 			.attr("transform", "translate(" + p.margin.left + "," + p.margin.top + ")");
 
+	// tip
+	tip = d3.tip()
+		.attr('class', 'd3-tip')
+		.html(function(d) { return d.time+" ("+d.length + ")"; });
+	svg.call(tip)
+	
+	
+	// bar
 	var bar = svg.selectAll(".bar")
 			.data(data)
 		.enter().append("g")
@@ -62,31 +78,35 @@ function ngraph(p){
 
 	bar.append("rect")
 			.attr("x", 1)
-			.attr("width", x(data[0].dx) - 1)
-			.attr("height", function(d) { return height - y(d.y); });
+			.attr("width", x(data[0].dx))
+			.attr("height", function(d) { return height - y(d.y); })
+			.on('mouseover', tip.show)
+      .on('mouseout', tip.hide);
 
-
+/*
 	bar.append("text")
 		.attr("dy", ".75em")
 		.attr("y", 6)
 		.attr("x", x(data[0].dx) / 2)
 		.attr("text-anchor", "middle")
 		.text(function(d) { return formatCount(d.y); });
-
+*/
 
 	svg.append("g")
 		.attr("class", "x axis")
 		.attr("transform", "translate(0," + height + ")")
 		.call(xAxis);
-
 }
 
 
 
-
-
-
-
+//////////////////
+// utils
+function ms2str(ms){
+	var min = ~~(ms/1000/60);
+	var sec = ~~(ms/1000%60);
+	return ("00"+min).slice(-2) + ":" + ("00"+sec).slice(-2);
+}
 
 
 
