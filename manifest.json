@@ -27,12 +27,14 @@
         "js/lib/d3.min.js",
         "js/lib/bootstrap.min.js",
         "js/utils.js",
-        "js/nico_model.js",
+        "js/nico_player.js",
         "js/content_scripts.js"
       ],
       "css":[
-        "css/bootstrap-theme.min.css",
-        "css/bootstrap.min.css"
+        //"css/style.css"
+        //"css/modal.css"
+        //"css/bootstrap.min.css"
+        //"css/bootstrap-theme.min.css"
       ],
       "persistent": false
     }
