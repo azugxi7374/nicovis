@@ -1,24 +1,32 @@
 {
-	"name": "nicocomvis",
-	"version": "0.0.1",
-	"manifest_version": 2,
-	"page_action": {
-	},
-	"permissions":[
-		"cookies",
-		"*://*.nicovideo.jp/",
-		"webNavigation"
-	],
-	"content_scripts" : [
-		{
-			"matches": ["*://*.nicovideo.jp/*"],
-			"js" : [
-				"jquery-2.1.4.min.js",
-				"background.js", 
-				"nico_model.js",
-				"underscore-min.js"
-		],
-		"persistent": false
-		}
-	]
+  "name": "nicocomvis",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  //"page_action": {
+  //},
+  "permissions": [
+    //"cookies",
+    //"*://*.nicovideo.jp/",
+    //"webNavigation"
+  ],
+  //"background": {
+    //"scripts": ["eventPage.js"],
+    //"persistent": false
+  //}
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.nicovideo.jp/*"
+      ],
+      "js": [
+        "jquery-2.1.4.min.js",
+        "underscore-min.js",
+        "d3.min.js",
+        "utils.js",
+        "nico_model.js",
+        "main.js"
+      ],
+      "persistent": false
+    }
+  ]
 }
