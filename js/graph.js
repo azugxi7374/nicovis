@@ -1,7 +1,7 @@
 var Graph = function(){
 
 	var margin = {top: 10, right: 30, bottom: 30, left: 30};
-	var w0 = 600;
+	var w0 = 800;
 	var h0 = 100;
 	var bin = 120;
 
@@ -13,42 +13,37 @@ var Graph = function(){
 
 		svg.html("");
 
-		var formatCount = d3.format(",.0f");
-		var width = w0 - margin.left - margin.right,
-			height = h0 - margin.top - margin.bottom;
+		var data = createLayout(cmts, len, bin);
+		console.log(data);
+
+		// svg
+		var content = svg.attr("width", w0).attr("height", h0)
+			.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		f(content, data, len, play, w0 - margin.left - margin.right,  h0 - margin.top - margin.bottom);
+	}
+
+	function f(content, data, len, play, width, height){
 
 		var x = d3.scale.linear()
 					.domain([0, len])
 					.range([0, width]);
-
-		var data = createLayout(cmts, len, x, bin);
-
-		console.log(data);
 
 		var y = d3.scale.linear()
 					.domain([0, d3.max(data, function(d) { return d.y; })])
 					.range([height, 0]);
 
 		var xAxis = d3.svg.axis()
-					.scale(x)
-					.orient("bottom");
+			.scale(x)
+			.tickFormat(function(d){return ms2str(d)})
+			.orient("bottom");
 
-		// svg
-		svg = svg.attr("width", width + margin.left + margin.right)
-				.attr("height", height + margin.top + margin.bottom)
-			.append("g")
-				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-		svg.append("g")
-			.append("rect")
-			.attr("x", 1)
-			.attr("width", width)
-			.attr("height", height)
+		content.append("g").append("rect").attr("x", 1).attr("width", width).attr("height", height)
 			.style("fill", "#000020")
-			.on('mouseover', function(d, i){console.log(d,i)});
 
 		// bar
-		var bar = svg.selectAll(".bar")
+		var bar = content.selectAll(".bar")
 				.data(data)
 			.enter().append("g")
 				.attr("class", "bar")
@@ -66,21 +61,32 @@ var Graph = function(){
 				return d3.hsl(v, 1, 0.5)
 			});
 
-		svg.append("g")
+		content.append("g")
 			.attr("class", "x axis")
 			.attr("transform", "translate(0," + height + ")")
 			.call(xAxis);
+
+		content.append("g").append("rect").attr("x", 1).attr("width", width).attr("height", height)
+			.style("opacity", 0)
+			.on('mouseover', function(d, i){console.log(d,i)});
 	}
 
 	////////////////////////////////////////
-	// createLayout
-	function createLayout(cmts, len, x, bin){
+	// createLayout (d3.layout.histogram()の拡張)
+	function createLayout(cmts, len, bin){
 		var values = _.chain(cmts).filter(function(c){return c.vpos < len}).value();
-		var hist = d3.layout.histogram().bins(x.ticks(bin))
+		var hist = d3.layout.histogram()
+			//.bins(x.ticks(bin))
+			.bins(bin)
   		.value(function(d){return d.vpos})
   		(values);
 
-		// たたみこみ
+		// initialCount
+		_.each(hist, function(d){
+			d.initialCount = d.length;
+		});
+
+		// 3秒間たたみこみ
 		_.each(hist, function(d, i){
 			_.each(d, function(c){
 				if(i+1 < hist.length && hist[i+1].x <= c.vpos + 3000){
@@ -89,6 +95,7 @@ var Graph = function(){
 			});
 		});
 
+		// y, length, time, sum, avg, std, med
 		_.each(hist, function(d){
 			d.y = d.length; // y
 			_.each(d, function(c){

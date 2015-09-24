@@ -12,6 +12,21 @@ NicoPlayer.get().then(function(np){
 			d3.select(a).style("display", "none");
 		});
 	}
+
+	//d3.select("#playerContainerWrapperr").append("div").html("aaaaaaaaaa");
+	d3.select("#playerContainerWrapper")
+		//.append("div")		.attr("width", 800)		.attr("height", 600)
+		//.style("z-index", 2530000)
+		.append("svg");
+
+
+	var graph = new Graph();
+	graph.draw(
+		//d3.select("#" + svgModalId).select(".modal-body").select("svg"),
+		d3.select("#content svg"),
+		np.getComments(),
+		np.length,
+		np.play)
 });
 
 var svgModalId = "svg_modal";
@@ -35,6 +50,14 @@ var svgModal = documentHere(function(){/*
 
 d3.select("body").append("div").html(svgModal);
 
+// TODO
+_.each(["#playerContainerWrapper", "#playerAlignmentArea","#playerContainer", "#playerNicoplayer",
+"#nicoplayerContainer", "#nicoplayerContainerInner","#external_nicoplayer"
+], function(name){
+	//d3.select("#content "+name).append("div").html(name+"!!")
+});
+
+
 // onClick...
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	if(request.pageButtonClicked){
@@ -49,12 +72,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			"]");
 
 
-			var graph = new Graph();
-			graph.draw(
-				d3.select("#" + svgModalId).select(".modal-body").select("svg"),
-				np.getComments(),
-				np.length,
-				np.play)
 		});
 
 		sendResponse("ok");
