@@ -7,6 +7,6 @@ function ms2str(ms){
 }
 
 function documentHere(func){
-    var str = func.toString()
-    return str.slice(str.indexOf("/*")+2, str.lastIndexOf("*/"));
+	var str = func.toString()
+	return str.slice(str.indexOf("/*")+2, str.lastIndexOf("*/"));
 }
