@@ -22,7 +22,7 @@ var svgModal = documentHere(function(){/*
 d3.select("body").append("div").html(svgModal);
 
 // onLoad...
-onLoadNicoPlayer(function(np){
+NicoPlayer.get().then(function(np){
 
     // TODO
     var comes = np.getComments(1000);
@@ -42,7 +42,7 @@ onLoadNicoPlayer(function(np){
 // onClick...
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if(request.pageButtonClicked){
-        onLoadNicoPlayer(function(np){
+        NicoPlayer.get().then(function(np){
             $("#"+svgModalId).modal();
 
             var comments = np.getComments(1000);
