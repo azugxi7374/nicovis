@@ -1,6 +1,5 @@
 var svgModalId = "svg_modal";
 var svgModal = documentHere(function(){/*
-<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" media="all" />
 <div id="***" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="svgModalLabel" style="display: none;">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -24,10 +23,8 @@ d3.select("body").append("div").html(svgModal);
 // onLoad...
 NicoPlayer.get().then(function(np){
 
-    // TODO
     var comes = np.getComments(1000);
-
-    _.chain(comes).first(100).each(function(c){
+    _.chain(comes).first(10).each(function(c){
         console.log(c.vpos + "," + c.message);
     });
 
