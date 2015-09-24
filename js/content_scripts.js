@@ -1,10 +1,11 @@
 // onLoad...
 NicoPlayer.get().then(function(np){
 
+	/*
 	var comes = np.getComments();
 	_.chain(comes).first(10).each(function(c){
 		console.log(c.vpos + "," + c.message);
-	});
+	});*/
 
 	// TODO 広告
 	if(true){
@@ -14,19 +15,24 @@ NicoPlayer.get().then(function(np){
 	}
 
 	//d3.select("#playerContainerWrapperr").append("div").html("aaaaaaaaaa");
-	d3.select("#playerContainerWrapper")
+	var svg = d3.select("#playerContainerWrapper")
 		//.append("div")		.attr("width", 800)		.attr("height", 600)
 		//.style("z-index", 2530000)
 		.append("svg");
 
 
-	var graph = new Graph();
-	graph.draw(
-		//d3.select("#" + svgModalId).select(".modal-body").select("svg"),
+	// svg, w0, h0, cmts, len, play, setTime, getTime
+	var graph = new Graph(
 		d3.select("#content svg"),
+		0, 0,
 		np.getComments(),
 		np.length,
-		np.play)
+		function(){ np.play(true)},
+		function(ms){	np.setTime(~~ms)},
+		function(){ return np.getTime()}
+		)
+	graph.draw();
+
 });
 
 var svgModalId = "svg_modal";
@@ -58,7 +64,7 @@ _.each(["#playerContainerWrapper", "#playerAlignmentArea","#playerContainer", "#
 });
 
 
-// onClick...
+// Page Button clicked...
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	if(request.pageButtonClicked){
 		NicoPlayer.get().then(function(np){
@@ -71,7 +77,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			}).value().join(","),
 			"]");
 
-
+			//NicoPlayer.test();
+			np.play(true);
 		});
 
 		sendResponse("ok");

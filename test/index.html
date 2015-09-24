@@ -21,8 +21,9 @@
 
     var svg = d3.select("body svg");
 
-    new Graph().draw(svg, sm9data, sm9len);
+    var f0 = function(){return 0;};
 
+    (new Graph(svg, {}, {}, sm9data, sm9len, f0, f0, f0)).draw();
 
 
 

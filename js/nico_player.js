@@ -3,19 +3,19 @@ var NicoPlayer = {
 		return NicoPlayerInitializer.get().then(function(player, tid) {
 
 			return {
-				// 長さ
+				// 長さ(ms)
 				length : Math.ceil(player.ext_getTotalTime() * 1000),
 				// play(true | false)
 				play : function(b){
 					player.ext_play(b);
 				},
-				// sec秒に移動
-				setTime : function(sec){
-					player.ext_setPlayheadTime(sec);
+				// msに移動
+				setTime : function(ms){
+					player.ext_setPlayheadTime(~~(ms / 1000));
 				},
-				// 現在の秒数
+				// 現在のms数
 				getTime : function(){
-					return player.ext_getPlayheadTime();
+					return player.ext_getPlayheadTime() * 1000;
 				},
 
 				// message, command, vpos, resNo, date
@@ -34,14 +34,14 @@ var NicoPlayer = {
 				np.getComments(),
 				np.play(true),
 				np.getTime(),
-				np.setTime(120 + 53),
+				np.setTime((120 + 53)*1000),
 				np.getTime()
 			)
 		})
 	}
 };
 
-var NicoPlayerInitializer = NicoPlayerInitializer || new function(){
+var NicoPlayerInitializer = new function(){
 	var tmpTag = "tmp_nicovis_main_thread_id"; /////
 	var getThreadInfo = "getThreadInfo";
 	var extFuncList = [
@@ -55,13 +55,21 @@ var NicoPlayerInitializer = NicoPlayerInitializer || new function(){
 	this.get = function(){
 		var d = new $.Deferred;
 
+		var time = 0;
+		function tle(t){return t > 30 * 1000};
 		function rec(){
 			if(trySet()){
 				console.log("set!!!")
 				d.resolve(player, threadId);
 			}else{
-				console.log("wait...")
-				setTimeout(rec, 1000);
+				if(tle(time)){
+					console.log("reject :(")
+					d.reject();
+				}else{
+					console.log("wait...")
+					setTimeout(rec, 1000);
+					time += 1000;
+				}
 			}
 		}
 		rec();
@@ -75,7 +83,9 @@ var NicoPlayerInitializer = NicoPlayerInitializer || new function(){
 			_.all(extFuncList, function(f){
 				return player[f];
 			}) &&
-			setMainThreadId(player);
+			setMainThreadId(player) &&
+			// !console.log(player.ext_getComments(threadId, 1)) &&
+			player.ext_getComments(threadId, 1).length == 1;
 	}
 
 	// insertTmpDOM

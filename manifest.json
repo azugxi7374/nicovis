@@ -19,7 +19,7 @@
 		{
 			"run_at": "document_idle",
 			"matches": [
-				"*://*.nicovideo.jp/*"
+				"*://*.nicovideo.jp/watch/*"
 			],
 			"js": [
 				"js/lib/jquery-2.1.4.min.js",
