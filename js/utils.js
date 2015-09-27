@@ -10,3 +10,14 @@ function documentHere(func){
 	var str = func.toString()
 	return str.slice(str.indexOf("/*")+2, str.lastIndexOf("*/"));
 }
+
+function allKeys(d){
+	return _.chain(Object.keys(d))
+		.filter(function(k){
+			var k0 = k.charAt(0);
+			return k0 < "0" || "9" < k0
+		}).map(function(k){
+			return k +":"+ d[k];
+	}).value().join("/");
+}
+

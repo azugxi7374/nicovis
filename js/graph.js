@@ -12,10 +12,12 @@ var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
 			"mousemove" : function(d, instance){
 				d3.select(instance).style({"opacity": 0.75})
 				var xy = d3.mouse(container.node())
-				tip.attr("x", xy[0]).attr("y", 0)
+				tip.attr("x", xy[0]).attr("y", 0).attr("fill", "#ffffff")
 					.text(
-						d.time + " / " + d.initialCount
+						[d.time, ~~d.density].join("/")
+						//allKeys(d)
 					);
+				console.log(allKeys(d));
 			},
 			"mouseout" : function(d, instance){
 				d3.select(instance).style({"opacity": 0})
@@ -112,7 +114,8 @@ var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
 			});
 		});
 
-		// y, length, time, sum, avg, std, med
+		// y, length, time, sum, avg, std, med, density
+		// TODO shitaとかbigとかも考慮
 		_.each(hist, function(d){
 			d.y = d.length; // y
 			_.each(d, function(c){
@@ -131,6 +134,7 @@ var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
 					.reduce(function(a,b){return a+b}).value()
 				);
 			d.med = d.length == 0 ? 0: d[~~(d.length/2)].length;
+			d.density = d.sum / d.dx * 1000
 		});
 
 		return hist;
@@ -139,8 +143,8 @@ var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
 	//
 	function data2color(d){
 		var h = d3.scale.linear().clamp(true)
- 				.domain([1, 50])
-				.range([180, 0])(d.avg);
+ 				.domain([1, 400])
+				.range([120, 0])(d.density);
 		return d3.hsl(h, 1, 0.5);
 	}
 }

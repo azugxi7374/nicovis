@@ -18,7 +18,7 @@ NicoPlayer.get().then(function(np){
 	var svg = d3.select("#playerContainerWrapper")
 		//.append("div")		.attr("width", 800)		.attr("height", 600)
 		//.style("z-index", 2530000)
-		.append("svg");
+		.append("svg").attr("class", "svg-graph");
 
 
 	// svg, w0, h0, cmts, len, play, setTime, getTime

@@ -56,7 +56,7 @@ var NicoPlayerInitializer = new function(){
 		var d = new $.Deferred;
 
 		var time = 0;
-		function tle(t){return t > 30 * 1000};
+		function tle(t){return t > 3 * 60 * 1000};
 		function rec(){
 			if(trySet()){
 				console.log("set!!!")

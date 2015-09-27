@@ -16,3 +16,11 @@ body {
 	stroke: #000;
 	shape-rendering: crispEdges;
 }
+
+.svg-graph{
+	margin-left:auto;
+	margin-right:auto;
+	display:block;
+}
+
+
