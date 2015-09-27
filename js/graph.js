@@ -1,11 +1,14 @@
 // graph
 var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
 
-	var margin = {top: 10, right: 30, bottom: 30, left: 30};
+	var margin = {top: 10, right: 30, bottom: 30, left: 60};
 	var bin = 120;
 
 	var w0 = 800;
 	var h0 = 100;
+	
+	var color0 = 120;
+	var color1 = 0;
 
 	function funcs(container, tip){
 		return {
@@ -81,9 +84,13 @@ var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
 		// xAxis
 		Drawing.drawXAxis(container, height, xScale);
 
+		// 再生位置監視
 		d3.timer(function(){
 			drawCurrentBar(curbar, xScale(~~getTime()), height)
 		}, 500);
+		
+		var colg = svg.append("g").attr("transform", "translate(" + (1+margin.left + width ) + "," + margin.top + ")")
+		Drawing.appendRect(colg, 10, height, []); // TODO
 
 		// overlay
 		//Drawing.appendRect(container.append("g"), width, height, [{"opacity":0}])
@@ -144,7 +151,7 @@ var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
 	function data2color(d){
 		var h = d3.scale.linear().clamp(true)
  				.domain([1, 400])
-				.range([120, 0])(d.density);
+				.range([color0, color1])(d.density);
 		return d3.hsl(h, 1, 0.5);
 	}
 }
