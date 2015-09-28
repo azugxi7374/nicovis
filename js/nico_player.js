@@ -1,3 +1,5 @@
+//
+// NicoPlayer.get().then(function(np){...});
 var NicoPlayer = {
 	get : function(){
 		return NicoPlayerInitializer.get().then(function(player, tid) {
@@ -41,6 +43,7 @@ var NicoPlayer = {
 	}
 };
 
+// playerとthreadIDを取得
 var NicoPlayerInitializer = new function(){
 	var tmpTag = "tmp_nicovis_main_thread_id"; /////
 	var getThreadInfo = "getThreadInfo";
@@ -48,15 +51,17 @@ var NicoPlayerInitializer = new function(){
 		"ext_getThreads", "ext_play", "ext_setPlayheadTime", "ext_getPlayheadTime",
 		"ext_getTotalTime", "ext_getComments"
 	];
+	var TLE = 3 * 60 * 1000
 	var player, threadId;
 
 	insertTmpDOM();
 
+	// 準備ができたらnpを返すDeferred
 	this.get = function(){
 		var d = new $.Deferred;
 
 		var time = 0;
-		function tle(t){return t > 3 * 60 * 1000};
+		function tle(t){return t > TLE};
 		function rec(){
 			if(trySet()){
 				console.log("set!!!")

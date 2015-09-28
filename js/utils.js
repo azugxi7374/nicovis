@@ -21,3 +21,56 @@ function allKeys(d){
 	}).value().join("/");
 }
 
+
+// サーモグラフィ的な色を返す
+// v : [0,1]
+function colorScale(v){
+	var base = [
+		[0,0,0],
+		[0,0,255],
+		[0,255,255],
+		[0,255,0],
+		[255,255,0],
+		[255,0,0],
+		[255,255,255]
+	];
+
+	function hokan(x, a, b){
+		return _.map([0,1,2], function(i){
+			return a[i] * (1 - x) + b[i] * x;
+		});
+	}
+
+	if(v <= 0) return base[0];
+	else if(1 <= v) return base[base.length -1];
+	else{
+		var vv = v * (base.length -1)
+		var ai = ~~vv;
+
+		console.log(v, vv, ai, hokan(vv - ai, base[ai], base[ai+1]));
+		return hokan(vv - ai, base[ai], base[ai+1]);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//

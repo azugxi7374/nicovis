@@ -6,9 +6,6 @@ var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
 
 	var w0 = 800;
 	var h0 = 100;
-	
-	var color0 = 120;
-	var color1 = 0;
 
 	function funcs(container, tip){
 		return {
@@ -77,7 +74,7 @@ var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
 			// .style("stroke-width", 1)
 
 		// background
-		Drawing.appendRect(back, width, height, [{"fill": "#000020"}])
+		Drawing.appendRect(back, width, height, [{"fill": "#808080"}])
 
 		Drawing.drawBar(bars, hData, xScale, yScale, height, data2color, funcs(container, tip));
 
@@ -149,11 +146,12 @@ var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
 
 	//
 	function data2color(d){
-		var h = d3.scale.linear().clamp(true)
- 				.domain([1, 400])
-				.range([color0, color1])(d.density);
-		return d3.hsl(h, 1, 0.5);
-	}
+		var c = colorScale(
+			d3.scale.linear().clamp(true)
+ 				.domain([1, 36*13])
+ 				.range([0,1])(d.density))
+ 		return d3.rgb(c[0], c[1], c[2]);
+ 	}
 }
 
 //////////////////////////////////////////
@@ -166,6 +164,7 @@ var Drawing = new function(){
 			.attr("class", "bar")
 
 		this.appendRect(
+			//bar, xScale(hData[0].dx), function(d) { return height - yScale(d.y); },[{"fill": colorConverter}])
 			bar, xScale(hData[0].dx), function(d) { return height - yScale(d.y); },[{"fill": colorConverter}])
 			.attr("transform", function(d) { return "translate(" + xScale(d.x) + "," + yScale(d.y) + ")"; });
 		var overs = this.appendRect(
