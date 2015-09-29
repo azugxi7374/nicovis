@@ -47,7 +47,6 @@ function colorScale(v){
 		var vv = v * (base.length -1)
 		var ai = ~~vv;
 
-		console.log(v, vv, ai, hokan(vv - ai, base[ai], base[ai+1]));
 		return hokan(vv - ai, base[ai], base[ai+1]);
 	}
 }
