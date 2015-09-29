@@ -21,6 +21,14 @@ function allKeys(d){
 	}).value().join("/");
 }
 
+function defval(v1, v2){
+	if(v1 !== undefined){
+		return v1;
+	}else{
+		return v2;
+	}
+}
+
 
 // サーモグラフィ的な色を返す
 // v : [0,1]
@@ -50,7 +58,10 @@ function colorScale(v){
 		return hokan(vv - ai, base[ai], base[ai+1]);
 	}
 }
-
+function d3ColorScale(v){
+	var c = colorScale(v);
+	return d3.rgb(c[0], c[1], c[2]);
+}
 
 
 

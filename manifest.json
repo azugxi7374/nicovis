@@ -1,5 +1,5 @@
 {
-	"name": "nicocomvis",
+	"name": "nicovis",
 	"version": "0.0.1",
 	"manifest_version": 2,
 	"page_action": {
@@ -28,6 +28,7 @@
 				"js/lib/bootstrap.min.js",
 				"js/utils.js",
 				"js/nico_player.js",
+				"js/comments.js",
 				"js/graph.js",
 				"js/content_scripts.js"
 			],

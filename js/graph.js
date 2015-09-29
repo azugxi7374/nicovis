@@ -1,11 +1,12 @@
 // graph
-var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
+var Graph = function(svg, w0, h0, _cmts, videoLen, play, setTime, getTime){
 
 	var margin = {top: 10, right: 30, bottom: 30, left: 60};
 	var bin = 120;
-
 	var w0 = 800;
 	var h0 = 100;
+	var cmts = new Comments(_cmts, videoLen);
+	console.log(cmts);
 
 	function funcs(container, tip){
 		return {
@@ -42,13 +43,6 @@ var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
 		curbar.attr("x1", x).attr("x2", x)
 	}
 
-	// setSize TODO
-//	this.setSize = function(_w0, _h0){
-//		w0 = _w0;
-//		h0 = _h0;
-//		reset();
-//	}
-
 	//
 	this.draw = function(){
 		svg.html("");
@@ -56,14 +50,14 @@ var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
 		var container = svg.attr("width", w0).attr("height", h0)
 			.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-		var hData = createLayout(cmts, len, bin);
+		var hData = cmts.histogramLayout(bin);
 		console.log(hData);
 
 		var width = w0 - margin.left - margin.right;
 		var height = h0 - margin.top - margin.bottom;
 
-		var xScale = d3.scale.linear().domain([0, len]).range([0, width]);
-		var yScale = d3.scale.linear().domain([0, d3.max(hData, function(d) { return d.y; })]).range([height, 0]);
+		var xScale = d3.scale.linear().domain([0, videoLen]).range([0, width]);
+		var yScale = d3.scale.linear().domain([0, 1]).range([height, 0]);
 
 		var back = container.append("g").attr("class", "background");
 		var bars = container.append("g").attr("class", "bars");
@@ -76,7 +70,7 @@ var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
 		// background
 		Drawing.appendRect(back, width, height, [{"fill": "#808080"}])
 
-		Drawing.drawBar(bars, hData, xScale, yScale, height, data2color, funcs(container, tip));
+		Drawing.drawBar(bars, hData, xScale, yScale, height, function(d){return d3ColorScale(d.c)}, funcs(container, tip));
 
 		// xAxis
 		Drawing.drawXAxis(container, height, xScale);
@@ -92,56 +86,6 @@ var Graph = function(svg, w0, h0, cmts, len, play, setTime, getTime){
 		// overlay
 		//Drawing.appendRect(container.append("g"), width, height, [{"opacity":0}])
 			//.on('mouseover', function(d, i){console.log(d,i)});
-	}
-
-	////////////////////////////////////////
-	// createLayout (d3.layout.histogram()の拡張)
-	function createLayout(cmts, len, bin){
-		var values = _.chain(cmts).filter(function(c){return c.vpos < len}).value();
-		var hist = d3.layout.histogram()
-			//.bins(x.ticks(bin))
-			.bins(bin)
-  		.value(function(d){return d.vpos})
-  		(values);
-
-		// initialCount
-		_.each(hist, function(d){
-			d.initialCount = d.length;
-		});
-
-		// 3秒間たたみこみ
-		_.each(hist, function(d, i){
-			_.each(d, function(c){
-				if(i+1 < hist.length && hist[i+1].x <= c.vpos + 3000){
-					hist[i+1].push(c);
-				}
-			});
-		});
-
-		// y, length, time, sum, avg, std, med, density
-		// TODO shitaとかbigとかも考慮
-		_.each(hist, function(d){
-			d.y = d.length; // y
-			_.each(d, function(c){
-				c.length = c.message.length; // length
-			});
-			_.sortBy(d, function(c){return c.length});
-			d.time = ms2str(d.x);
-			d.sum = _.chain(d)
-				.map(function(c){return c.length})
-				.reduce(function(a,b){return a + b})
-				.value();
-			d.avg = d.sum / d.length;
-			d.std = Math.sqrt(
-				_.chain(d)
-					.map(function(c){return Math.pow(c.length - d.avg, 2)})
-					.reduce(function(a,b){return a+b}).value()
-				);
-			d.med = d.length == 0 ? 0: d[~~(d.length/2)].length;
-			d.density = d.sum / d.dx * 1000
-		});
-
-		return hist;
 	}
 
 	//
@@ -164,11 +108,10 @@ var Drawing = new function(){
 			.attr("class", "bar")
 
 		this.appendRect(
-			//bar, xScale(hData[0].dx), function(d) { return height - yScale(d.y); },[{"fill": colorConverter}])
 			bar, xScale(hData[0].dx), function(d) { return height - yScale(d.y); },[{"fill": colorConverter}])
 			.attr("transform", function(d) { return "translate(" + xScale(d.x) + "," + yScale(d.y) + ")"; });
 		var overs = this.appendRect(
-			bar, xScale(hData[0].dx), height, [{"fill": "#ffffff"}, {"opacity": 0}])
+			bar, xScale(hData[0].dx), height, [{"stroke": "#ffffff"}, {"opacity": 0}])
 			.attr("transform", function(d) { return "translate(" + xScale(d.x) + "," + 0 + ")"; })
 
 		_.each(funcs, function(f, k){
