@@ -8,14 +8,15 @@ var Graph = function(svg, w0, h0, _cmts, videoLen, play, setTime, getTime){
 	var cmts = new Comments(_cmts, videoLen);
 
 	var histParams = {
-		yAcs : function(d){return d.length},
-		cAcs : function(d){return d.density},
+		yAcs : function(d){return d.viscnt},
+		cAcs : function(d){return d.vol},
 	}
 	histParams = _.extend(histParams, {
 		yMin : function(){return 0},
   	yMax : function(data){return d3.max(data, histParams.yAcs)},
 		cMin : function(){return 0},
-		cMax : function(data){return d3.max(data, histParams.cAcs)},
+		//cMax : function(data){return d3.max(data, histParams.cAcs)},
+		cMax : function(){return 12.5 * 1000},
 	});
 
 
@@ -92,21 +93,21 @@ var Graph = function(svg, w0, h0, _cmts, videoLen, play, setTime, getTime){
 		}, 500);
 		
 		var colg = svg.append("g").attr("transform", "translate(" + (1+margin.left + width ) + "," + margin.top + ")")
-		Drawing.appendRect(colg, 10, height, []); // TODO
+		// Drawing.appendRect(colg, 10, height, []); // TODO
 
 		// overlay
 		//Drawing.appendRect(container.append("g"), width, height, [{"opacity":0}])
 			//.on('mouseover', function(d, i){console.log(d,i)});
 	}
 
-	//
+	/*
 	function data2color(d){
 		var c = colorScale(
 			d3.scale.linear().clamp(true)
  				.domain([1, 36*13])
  				.range([0,1])(d.density))
  		return d3.rgb(c[0], c[1], c[2]);
- 	}
+ 	}*/
 }
 
 //////////////////////////////////////////
