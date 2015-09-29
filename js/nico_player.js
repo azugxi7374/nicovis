@@ -64,7 +64,7 @@ var NicoPlayerInitializer = new function(){
 		function tle(t){return t > TLE};
 		function rec(){
 			if(trySet()){
-				console.log("set!!!")
+				//console.log("set!!!")
 				d.resolve(player, threadId);
 			}else{
 				if(tle(time)){

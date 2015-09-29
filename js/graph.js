@@ -6,7 +6,18 @@ var Graph = function(svg, w0, h0, _cmts, videoLen, play, setTime, getTime){
 	var w0 = 800;
 	var h0 = 100;
 	var cmts = new Comments(_cmts, videoLen);
-	console.log(cmts);
+
+	var histParams = {
+		yAcs : function(d){return d.length},
+		cAcs : function(d){return d.density},
+	}
+	histParams = _.extend(histParams, {
+		yMin : function(){return 0},
+  	yMax : function(data){return d3.max(data, histParams.yAcs)},
+		cMin : function(){return 0},
+		cMax : function(data){return d3.max(data, histParams.cAcs)},
+	});
+
 
 	function funcs(container, tip){
 		return {
@@ -15,10 +26,10 @@ var Graph = function(svg, w0, h0, _cmts, videoLen, play, setTime, getTime){
 				var xy = d3.mouse(container.node())
 				tip.attr("x", xy[0]).attr("y", 0).attr("fill", "#ffffff")
 					.text(
-						[d.time, ~~d.density].join("/")
+						[d.time, ~~histParams.yAcs(d), ~~histParams.cAcs(d)].join("/")
 						//allKeys(d)
 					);
-				console.log(allKeys(d));
+				//console.log(allKeys(d));
 			},
 			"mouseout" : function(d, instance){
 				d3.select(instance).style({"opacity": 0})
@@ -50,7 +61,7 @@ var Graph = function(svg, w0, h0, _cmts, videoLen, play, setTime, getTime){
 		var container = svg.attr("width", w0).attr("height", h0)
 			.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-		var hData = cmts.histogramLayout(bin);
+		var hData = cmts.histogramLayout(bin, histParams);
 		console.log(hData);
 
 		var width = w0 - margin.left - margin.right;

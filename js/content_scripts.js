@@ -38,6 +38,9 @@ function disableAds(){
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	if(request.pageButtonClicked){
 		console.log("pageButtonClicked!")
+		NicoPlayer.get().then(function(np){
+			console.log(JSON.stringify(np.getComments()));
+		});
 		sendResponse("ok");
 	};
 });
