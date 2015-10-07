@@ -1,30 +1,45 @@
-var svgClass = "svg-nicovis"
-var wrapperElem = d3.select("#playerContainerWrapper")
+//var svgClass = "svg-nicovis";
+var containerID = "container-nicovis-1"
+function getContainer(){ return d3.select("#"+containerID)};
+function getPlayerContainerWrapper(){ return d3.select("#playerContainerWrapper")};
+function getSVG(){ return getContainer().select("svg");}
+var reset = init;
 
-// reset button & svg
-wrapperElem.append("button").html("reset").on("click", reset);
-var svg = wrapperElem.append("svg").attr("class", svgClass);
+function init(){
+	// container
+	console.log("init!");
+	var container = getContainer();
+	if(container.empty()){
+		container = getPlayerContainerWrapper().append("div").attr("id", containerID);
+	}
 
-reset();
+	// button, svg
+	clear();
+	container.append("button").html("reset").on("click", reset);
+	container.append("svg");
 
-// 読み込み & 書き直し
-function reset(){
-	console.log("reset!")
+  // nicoPlayer, graph
 	NicoPlayer.get().then(function(np){
-    svg.html("");
-    new Graph( // svg, w0, h0, cmts, len, play, setTime, getTime
-    	svg,
-    	0, 0,
-    	np.getComments(),
-    	np.length,
-    	function(){ np.play(true)},
-    	function(ms){	np.setTime(~~ms)},
-    	function(){ return np.getTime()}
-    ).draw();
+		new Graph( // svg, w0, h0, cmts, len, play, setTime, getTime
+			getSVG(),
+			0, 0,
+			np.getComments(),
+			np.length,
+			function(){ np.play(true)},
+			function(ms){	np.setTime(~~ms)},
+			function(){ return np.getTime()}
+		).draw();
 
 		disableAds();
+		chrome.runtime.sendMessage({message:"complete"});
 	});
 }
+
+function clear(){
+	console.log("clear!")
+	getContainer().html("");
+}
+
 
 // 広告
 function disableAds(){
@@ -34,15 +49,39 @@ function disableAds(){
 }
 
 
-// Page Button clicked...
+/////////////////////////////////////////////////////////////////
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+	console.log("request : " , request, request.message, request.valid, sender);
+
+	if(_.contains(["onCommitted", "onCompleted", "onHistoryStateUpdated"], request.message)){
+		if(request.valid){
+			init();
+		}else{
+			clear();
+		}
+	}
+	/*
+	// onCompleted
+	if(request.message === "onCompleted"){
+		reset();
+	}
+	if(request.message === "onBeforeNavigate"){
+		console.log(request.valid);
+		if(request.valid){
+			reset();
+		}else{
+			clear();
+		}
+	}
+	// Page Button
 	if(request.pageButtonClicked){
 		console.log("pageButtonClicked!")
 		NicoPlayer.get().then(function(np){
 			console.log(JSON.stringify(np.getComments()));
 		});
-		sendResponse("ok");
-	};
+		//sendResponse("ok");
+	};*/
+
 });
 
 

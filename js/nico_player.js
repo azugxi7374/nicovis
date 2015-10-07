@@ -53,8 +53,7 @@ var NicoPlayerInitializer = new function(){
 	];
 	var TLE = 3 * 60 * 1000
 	var player, threadId;
-
-	insertTmpDOM();
+	var pid = 0;
 
 	// 準備ができたらnpを返すDeferred
 	this.get = function(){
@@ -62,39 +61,38 @@ var NicoPlayerInitializer = new function(){
 
 		var time = 0;
 		function tle(t){return t > TLE};
-		function rec(){
+		function rec(i){
 			if(trySet()){
-				//console.log("set!!!")
+				console.log("succeeded!! :) ("+i+")");
 				d.resolve(player, threadId);
 			}else{
-				if(tle(time)){
-					console.log("reject :(")
+				if(pid != i || tle(time)){
+					console.log("reject :( ("+i+")");
 					d.reject();
 				}else{
-					console.log("wait...")
-					setTimeout(rec, 1000);
+					console.log("wait...("+i+")");
+					setTimeout(function(){rec(i)}, 1000);
 					time += 1000;
 				}
 			}
 		}
-		rec();
+		rec(++pid);
 
 		return d.promise();
 	}
 
 	// set : player, threadId
 	function trySet(){
-		return setPlayer() &&
-			_.all(extFuncList, function(f){
-				return player[f];
-			}) &&
-			setMainThreadId(player) &&
-			// !console.log(player.ext_getComments(threadId, 1)) &&
-			player.ext_getComments(threadId, 1).length == 1;
+
+		return (setPlayer() ? true : console.log("Faild : setPlayer")) &&
+			(_.all(extFuncList, function(f){	return player[f];	}) ? true : console.log("Faild : functions")) &&
+			(insertTmpDOM() && setMainThreadId(player) ? true : console.log("Faild : setMainThreadId")) &&
+			(player.ext_getComments(threadId, 1).length == 1 ? true : console.log("Faild : getComments"));
 	}
 
 	// insertTmpDOM
 	function insertTmpDOM(){
+		///////////////////////////
 		var js = documentHere(function(){// /*
 			var mainThreadId;
 			var ___ = function(param) {
@@ -108,7 +106,8 @@ var NicoPlayerInitializer = new function(){
 			}
 			// */
 		}).replace("***", tmpTag).replace("___", getThreadInfo);
-
+		////////////////////
+		
 		if(d3.select(tmpTag).empty()){
 			d3.select("body").append(tmpTag).style("display","none");
 			d3.select("body").append("script").attr("type", "text/javascript").text(js);
