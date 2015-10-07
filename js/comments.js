@@ -30,15 +30,6 @@ var Comments = function(_comments, _videoLen){
 				return c;
 			}).value();
 	}
-	/*
-	// 画面に表示されている文字数(?)
-	this.density = function(ms){
-		var cnt = 0;
-		_.each(cmts, function(cmt){
-			cnt += this.visibleLength(cmt, ms);
-		});
-		return cnt;
-	}*/
 
 	// TODO small_big, shita_ue, 半角
 	function cmtWidth(cmt){
@@ -105,16 +96,10 @@ var Comments = function(_comments, _videoLen){
 
 	////////////////////////////////////////
 	// createLayout (d3.layout.histogram()の拡張)
-	// params : yAcs, yMin, yMax, cAcs, cMin, cMax
-	this.histogramLayout = function(bin, params){
+	this.histogramLayout = function(bin, yParams, cParams){
 		bin = defval(bin, 120);
-		params = defval(params, {});
-		var yAcs = defval(params.yAcs, function(d){return d.length});
-		var yMin = defval(params.yMin, function(){return 0});
-		var yMax = defval(params.yMax, function(data){return d3.max(data, yAcs)});
-		var cAcs = defval(params.cAcs, function(d){return d.density});
-		var cMin = defval(params.cMin, function(){return 0});
-		var cMax = defval(params.cMax, function(data){return d3.max(data, cAcs)});
+		//var yParams = defval(yParams, Comments.params.hist.count);
+		//var cParams = defval(cParams, Comments.params.hist.volume);
 
 		var hist = d3.layout.histogram()
 			.bins(bin)
@@ -145,12 +130,12 @@ var Comments = function(_comments, _videoLen){
 			d.viscnt = visCount(self.cmts, d.x, d.x+d.dx);
 		});
 
-		var yScale = d3.scale.linear().domain([yMin(hist), yMax(hist)]).range([0, 1]);
-		var cScale = d3.scale.linear().domain([cMin(hist), cMax(hist)]).range([0, 1]);
+		var yScale = d3.scale.linear().domain([yParams.min(hist), yParams.max(hist)]).range([0, 1]);
+		var cScale = d3.scale.linear().domain([cParams.min(hist), cParams.max(hist)]).range([0, 1]);
 
 		_.each(hist, function(d){
-			d.y = yScale(yAcs(d));
-			d.c = cScale(cAcs(d));
+			d.y = yScale(yParams.acs(d));
+			d.c = cScale(cParams.acs(d));
 		})
 
 		return hist;
@@ -168,6 +153,21 @@ var Comments = function(_comments, _videoLen){
 
 	console.log(this.cmdRates());
 }
+
+Comments.params = {
+	hist : {
+		count : {
+			acs : function(d){return d.viscnt},
+			min : function(){return 0},
+			max : function(data){return d3.max(data, function(d){return d.viscnt})},
+		},
+		volume : {
+			acs : function(d){return d.vol},
+			min : function(){return 0},
+			max : function(){return 12.5 * 1000},
+		},
+	},
+};
 
 //
 //

@@ -7,6 +7,13 @@ body {
 	shape-rendering: crispEdges;
 }
 
+.curbar{
+	stroke: #111;
+}
+.pbar{
+	stroke: #eee;
+}
+
 .axis path, .axis line {
 	fill: none;
 	stroke: #000;

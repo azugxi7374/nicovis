@@ -2,7 +2,6 @@
 var containerID = "container-nicovis-1"
 function getContainer(){ return d3.select("#"+containerID)};
 function getPlayerContainerWrapper(){ return d3.select("#playerContainerWrapper")};
-function getSVG(){ return getContainer().select("svg");}
 var reset = init;
 
 function init(){
@@ -16,19 +15,25 @@ function init(){
 	// button, svg
 	clear();
 	container.append("button").html("reset").on("click", reset);
-	container.append("svg");
+	//container.append("svg");
 
   // nicoPlayer, graph
 	NicoPlayer.get().then(function(np){
-		new Graph( // svg, w0, h0, cmts, len, play, setTime, getTime
-			getSVG(),
-			0, 0,
-			np.getComments(),
+		new Histogram(
+			getContainer().append("div"),
+			{w:800, h:100},
+			new Comments(np.getComments(), np.length),
+			undefined,
+			undefined,
 			np.length,
-			function(){ np.play(true)},
-			function(ms){	np.setTime(~~ms)},
-			function(){ return np.getTime()}
-		).draw();
+			{
+				getTime: np.getTime,
+				setTime: function(ms){np.setTime(~~ms)},
+				play: function(){np.play(true)},
+			},
+			function(f){d3.timer(f, 500)}
+		).reset();
+
 
 		disableAds();
 		chrome.runtime.sendMessage({message:"complete"});
@@ -56,19 +61,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	if(_.contains(["onCommitted", "onCompleted", "onHistoryStateUpdated"], request.message)){
 		if(request.valid){
 			init();
-		}else{
-			clear();
-		}
-	}
-	/*
-	// onCompleted
-	if(request.message === "onCompleted"){
-		reset();
-	}
-	if(request.message === "onBeforeNavigate"){
-		console.log(request.valid);
-		if(request.valid){
-			reset();
 		}else{
 			clear();
 		}
