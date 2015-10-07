@@ -64,6 +64,53 @@ function d3ColorScale(v){
 }
 
 
+//////////////////////////////////////////
+// Drawing Helper
+var Drawing = new function(){
+	var self = this;
+
+	this.rectAttr = function(width, height, styles){
+		return function(s){
+			return s.attr("x", 0).attr("width", width).attr("height", height)
+				.call(function(s){
+					_.each(styles, function(obj){
+						_.each(obj, function(v,k){
+							s = s.style(k,v);
+						});
+					});
+				});
+		};
+	};
+
+	//
+	this.addTranslate = function(p1, p2){
+		return function(s){
+			var f;
+			if(typeof p1 === "function"){
+				f = function(d){
+					var a = p1(d); return "translate(" + a[0] + "," + a[1] + ")";
+				};
+			}else{
+				f = function(d){
+					return "translate(" + p1 + "," + p2 + ")";
+				};
+			}
+			return s.attr("transform", f);
+		}
+	}
+
+	this.createBar = function(par, cls, height){
+		var bar = par.append("line").attr("class", cls).attr("y1", 0).attr("y2", height);
+		return {
+			move: function(x){
+				bar.attr("x1", x).attr("x2", x)
+			},
+			show: function(b){
+				bar.style("opacity", b ? 1.0 : 0.0);
+			}
+		};
+	}
+}
 
 
 

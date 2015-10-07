@@ -141,6 +141,20 @@ var Comments = function(_comments, _videoLen){
 		return hist;
 	}
 
+	// pieLayout
+	this.pieLayout = function(acs){
+		var data = _.chain(this.cmts).countBy(function(c){
+			return acs.acs(c);
+		}).pairs().map(function(a){
+			return {name: a[0], count: a[1]};
+		}).value();
+
+		console.log(data);
+		return d3.layout.pie()
+			.value(function(d){return d.count})
+			(data);
+	}
+
 	// command
 	this.cmdRates = function(){
 		return _.chain(this.cmts).map(function(cmt){
@@ -165,6 +179,26 @@ Comments.params = {
 			acs : function(d){return d.vol},
 			min : function(){return 0},
 			max : function(){return 12.5 * 1000},
+		},
+		//recent : {
+		//}
+	},
+	pie : {
+		color : {
+			name : "COLOR",
+			acs : function(d){return d.color}
+		},
+		size : {
+			name : "SIZE",
+			acs : function(d){return d.size}
+		},
+		device : {
+			name : "DEVICE",
+			acs : function(d){return d.device}
+		},
+		_184 : {
+			name : "184",
+			acs : function(d){return d._184}
 		},
 	},
 };

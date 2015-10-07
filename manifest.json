@@ -31,7 +31,8 @@
 				"js/nico_player.js",
 				"js/comments.js",
 				"js/histogram.js",
-				"js/content_scripts.js"
+				"js/pie.js",
+			  	"js/content_scripts.js"
 			],
 			"css":[
 				"css/booooootstrap.css",

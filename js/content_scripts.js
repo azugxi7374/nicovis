@@ -19,10 +19,12 @@ function init(){
 
   // nicoPlayer, graph
 	NicoPlayer.get().then(function(np){
+		var cmts = new Comments(np.getComments(), np.length);
+
 		new Histogram(
 			getContainer().append("div"),
 			{w:800, h:100},
-			new Comments(np.getComments(), np.length),
+			cmts,
 			undefined,
 			undefined,
 			np.length,
@@ -32,8 +34,16 @@ function init(){
 				play: function(){np.play(true)},
 			},
 			function(f){d3.timer(f, 500)}
-		).reset();
+		).draw();
 
+		_.each(Comments.params.pie, function(acs){
+			new Pie(
+				getContainer().append("span"),
+				{w: 200, h: 200},
+				cmts,
+				acs
+			).draw();
+		});
 
 		disableAds();
 		chrome.runtime.sendMessage({message:"complete"});
@@ -65,6 +75,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			clear();
 		}
 	}
+	/*
 	// Page Button
 	if(request.pageButtonClicked){
 		console.log("pageButtonClicked!")
@@ -72,7 +83,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			console.log(JSON.stringify(np.getComments()));
 		});
 		//sendResponse("ok");
-	};*/
+	};
+	*/
 
 });
 

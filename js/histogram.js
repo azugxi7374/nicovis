@@ -7,7 +7,7 @@
 var Histogram = function(container, size, cmts, yParams, cParams, vlen, funcs, timer){
 	this.ID = _.uniqueId();
 
-	var margin = {top: 10, right: 30, bottom: 30, left: 60};
+	var margin = {top: 10, right: 30, bottom: 30, left: 30};
 	var bin = 120;
 
 	var back, bars_g, over, tip, xAxis;
@@ -35,7 +35,7 @@ var Histogram = function(container, size, cmts, yParams, cParams, vlen, funcs, t
 	}
 
 	// reset
-	this.reset = function(){
+	this.draw = function(){
 		var wd = size.w - margin.left - margin.right,
 			ht = size.h - margin.top - margin.bottom;
 		yParams = defval(yParams, Comments.params.hist.count);
@@ -110,56 +110,6 @@ var Histogram = function(container, size, cmts, yParams, cParams, vlen, funcs, t
 		return hist[idx];
 	}
 }
-
-//////////////////////////////////////////
-// Drawing Helper
-var Drawing = new function(){
-	var self = this;
-
-	this.rectAttr = function(width, height, styles){
-		return function(s){
-			return s.attr("x", 0).attr("width", width).attr("height", height)
-				.call(function(s){
-					_.each(styles, function(obj){
-						_.each(obj, function(v,k){
-							s = s.style(k,v);
-						});
-					});
-				});
-		};
-	};
-
-	//
-	this.addTranslate = function(p1, p2){
-		return function(s){
-			var f;
-			if(typeof p1 === "function"){
-				f = function(d){
-					var a = p1(d); return "translate(" + a[0] + "," + a[1] + ")";
-				};
-			}else{
-				f = function(d){
-					return "translate(" + p1 + "," + p2 + ")";
-				};
-			}
-			return s.attr("transform", f);
-		}
-	}
-
-	this.createBar = function(par, cls, height){
-		var bar = par.append("line").attr("class", cls).attr("y1", 0).attr("y2", height);
-		return {
-			move: function(x){
-				bar.attr("x1", x).attr("x2", x)
-			},
-			show: function(b){
-				bar.style("opacity", b ? 1.0 : 0.0);
-			}
-		};
-	}
-}
-
-
 
 
 
