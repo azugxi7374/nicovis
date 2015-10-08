@@ -19,40 +19,50 @@ var Pie = function(container, size, cmts, acs){
 			.outerRadius(radius);
 
 		var pData = cmts.pieLayout(acs, function(p){
-			return p.sort(Comments.pie.sort).padAngle(.02)
+			return p.sort(Comments.pie.sort)//.padAngle(.02)
 		});
 		console.log(pData);
 
 		var palette = Constant.piePalette;
 
+		// set dom
 		container.html("");
-		// container.append("button").html("button1").on("click", function(){console.log('button1_clicked')});
-
 		var svg = container.append("svg").attr("width", size.w).attr("height", size.h)
-		svg.append("rect").call(
-			Drawing.rectAttr(size.w, size.h, [{"fill": "#a0a0a0"}])
-//		).call(
-//			Drawing.addTranslate(margin.left, margin.top)
+		var back = svg.append("rect").call(
+			Drawing.rectAttr(0,0, size.w, size.h, [{"fill": "#a0a0a0"}])
 		);
+		var g = svg.append("g").call(Drawing.addTranslate(cx, cy));
+		var title = g.append("text")
 
-		var svgg = svg.append("g").call(Drawing.addTranslate(cx, cy));
+		var data_g = g.selectAll("g").data(pData).enter().append("g")
 
-		var g = svgg.selectAll("g").data(pData).enter().append("g")
+		var tip = Drawing.createTip(svg, g, "tip");
+		//var over = g.append("rect").style("opacity", 0);
 
-		g.append("path").attr("d", arc).style("fill", function(d, i) { return palette(d.data.color); });
+		var paths = data_g.append("path").attr("d", arc).style("fill", function(d, i) { return palette(d.data.color); })
 
-		// label
-		g.append("text")
+		var labels = data_g.append("text")
 			.attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
 			.attr("dy", ".35em")
 			.style("text-anchor", "middle")
-			.text(function(d) { return d.data.disp; });
+			.text(function(d) {return d.data.disp; })
+			.call(Drawing.setOpacity(function(d){return d.data.rate < 0.1 ? 0 : 1}));
 
-		svgg.append("text")
-			.attr("transform", function(d) { return "translate(0,0)"; })
-			.attr("dy", ".35em")
-			.style("text-anchor", "middle")
-			.text(acs.name);
+		var over = g.append("g").selectAll("path").data(pData).enter().append("path").attr("d", arc).style("opacity", 0)
+		.on("mousemove", function(d){
+			//console.log("move");
+			tip.show(true);
+			tip.set([d.data.disp, numeral(d.data.rate).format("0.0%")].join("/"))
+		}).on("mouseon", function(d){
+			//console.log("on");
+			tip.show(true);
+			tip.set(d.data.disp)
+		}).on("mouseout", function(d){
+			//console.log("out");
+			tip.show(false);
+		});
+		title.call(Drawing.addTranslate(0,0))
+			.attr("dy", ".35em").style("text-anchor", "middle").text(acs.name);
 
 	};
 }

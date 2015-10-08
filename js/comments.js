@@ -136,6 +136,7 @@ var Comments = function(_comments, _videoLen){
 	}
 
 	// pieLayout
+	// rateあり
 	this.pieLayout = function(acs, opt){
 		var data = _.chain(this.cmts).countBy(function(c){
 			return acs.acs(c);
@@ -147,6 +148,15 @@ var Comments = function(_comments, _videoLen){
 			});
 			return obj;
 		}).value();
+
+		var sum = _.chain(data).map(function(d){
+			return d.count;
+		}).reduce(function(a,b){return a+b})
+		.value();
+
+		_.each(data, function(d){
+			d.rate = d.count / sum;
+		});
 
 		return opt(
 				d3.layout.pie().value(function(d){return d.count})

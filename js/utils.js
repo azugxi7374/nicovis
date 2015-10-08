@@ -11,6 +11,7 @@ function documentHere(func){
 	return str.slice(str.indexOf("/*")+2, str.lastIndexOf("*/"));
 }
 
+/*
 function allKeys(d){
 	return _.chain(Object.keys(d))
 		.filter(function(k){
@@ -19,7 +20,7 @@ function allKeys(d){
 		}).map(function(k){
 			return k +":"+ d[k];
 	}).value().join("/");
-}
+}*/
 
 function defval(v1, v2){
 	if(v1 !== undefined){
@@ -85,18 +86,16 @@ function optMap(obj, f){
 
 
 
-
-
 //////////////////////////////////////////
 // Drawing Helper
 var Drawing = new function(){
 	var self = this;
 
-	this.rectAttr = function(width, height, styles){
+	this.rectAttr = function(x, y, w, h, styles){
 		return function(s){
-			return s.attr("x", 0).attr("width", width).attr("height", height)
+			return s.attr("x", x).attr("y", y).attr("width", w).attr("height", h)
 				.call(function(s){
-					_.each(styles, function(obj){
+					_.each(defval(styles, []), function(obj){
 						_.each(obj, function(v,k){
 							s = s.style(k,v);
 						});
@@ -133,16 +132,51 @@ var Drawing = new function(){
 			}
 		};
 	}
-	this.createTip = function(par, cls){
-		var tip = par.append("text").attr("class", cls).attr("fill", "#101010")
+	this.createTip = function(svg, par, cls){
+		var m = 5;
+		var rect = par.append("rect").call(this.rectAttr(0, 0, 0, 0, [{"fill": "white"}]))
+			.attr("rx", 10).attr("ry", 10);
+		var text = par.append("text").attr("class", cls).attr("fill", "#101010")//.style("text-anchor", "middle")
 		return {
 			set: function(s){
-				var xy = d3.mouse(par.node());
-				tip.attr("x", xy[0]).attr("y", xy[1]).text(s)
+				var mxy = d3.mouse(par.node());
+				var x = mxy[0], y = mxy[1];
+				var sxy = d3.mouse(svg.node());
+				var sdx = sxy[0] - x, sdy = sxy[1] - y;
+
+				text.text(s)
+
+				var svgW = svg.node().offsetWidth, svgH = svg.node().offsetHeight;
+				var w = text.node().offsetWidth, h = text.node().offsetHeight;
+				var rw = w + 2 * m, rh = h + 2 * m;
+				var rx = x, ry = y - h - 2 * m;
+				var tx = x + m, ty = y - h * 0.33 - m;
+				rect.attr("width", rw).attr("height", rh);
+
+				var off = [[0, 0],[0, rh],[-rw, 0],[-rw, rh]];
+				var xy = _.find(off, function(xy){
+					var x = rx + xy[0] + sdx, y = ry + xy[1] + sdy;
+					return 0 <= x && 0 <= y && x + rw <= svgW && y + rh <= svgH;
+				});
+				xy = defval(xy, _.first(off));
+				text.call(self.setXY(tx + xy[0], ty + xy[1]));
+				rect.call(self.setXY(rx + xy[0], ry + xy[1]));
+
 			},
 			show: function(b){
-				bar.style("opacity", b ? 1.0 : 0.0);
+				text.style("opacity", b ? 1 : 0.0);
+				rect.style("opacity", b ? 0.75 : 0.0);
 			}
+		}
+	}
+	this.setOpacity = function(v){
+		return function(s){
+			return s.style("opacity", v);
+		}
+	};
+	this.setXY = function(x, y){
+		return function(s){
+			return s.attr("x", x).attr("y", y);
 		}
 	}
 }

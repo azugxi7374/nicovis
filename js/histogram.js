@@ -20,13 +20,13 @@ var Histogram = function(container, size, cmts, yParams, cParams, vlen, funcs, t
 		var svg = ctn.append("svg").attr("width", size.w).attr("height", size.h);
 		var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-		back = g.append("rect").call(Drawing.rectAttr(wd, ht, [{"fill": "#808080"}]));
+		back = g.append("rect").call(Drawing.rectAttr(0,0, wd, ht, [{"fill": "#808080"}]));
 		bars_g = g.append("g").attr("class", "bars");
 		curbar = Drawing.createBar(g, "curbar", ht);
 		pbar = Drawing.createBar(g, "pbar", ht);
-		over = g.append("rect").call(Drawing.rectAttr(wd, ht, [{"opacity": 0.0}]));
+		tip = Drawing.createTip(svg, g, "tip");
+		over = g.append("rect").call(Drawing.rectAttr(0,0, wd, ht, [{"opacity": 0.0}]));
 		xAxis = g.append("g").attr("class", "x axis").call(Drawing.addTranslate(0, ht));
-		tip = Drawing.createTip(g);
 	}
 
 	// TODO
@@ -52,9 +52,10 @@ var Histogram = function(container, size, cmts, yParams, cParams, vlen, funcs, t
 		// color bar
 		bars_g.selectAll(".bar").data(hData).enter().append("g").attr("class", "bar")
 			.append("rect").call(Drawing.rectAttr(
+				function(d){return xScale(d.x)}, function(d){return yScale(d.y)},
 				xScale(hData[0].dx), function(d) { return ht - yScale(d.y); }, [{"fill": function(d){return d3ColorScale(d.c)}}])
-			).call(
-				Drawing.addTranslate(function(d){return [xScale(d.x), yScale(d.y)]}));
+			)//.call(
+				//Drawing.addTranslate(function(d){return [xScale(d.x), yScale(d.y)]}));
 
 		// overlay bar
 		var dAcs = function(x){ return searchData(hData, xInvScale(x))}
@@ -81,7 +82,8 @@ var Histogram = function(container, size, cmts, yParams, cParams, vlen, funcs, t
 				var d = dAcs(x);
 				pbar.show(true);
 				pbar.move(x);
-				tip([d.time, ~~yParams.acs(d), ~~cParams.acs(d)].join("/"))
+				tip.show(true);
+				tip.set([d.time, ~~yParams.acs(d), ~~cParams.acs(d)].join("/"))
 				/*
 				tip.attr("x", x).attr("y", 0).attr("fill", "#ffffff")
 					.text(
@@ -90,7 +92,7 @@ var Histogram = function(container, size, cmts, yParams, cParams, vlen, funcs, t
 			},
 			"mouseout" : function(){
 				pbar.show(false);
-				tip.text("");
+				tip.show(false);
 			},
 			"click" : function(){
 				funcs.setTime(dAcs(getX()).x);
