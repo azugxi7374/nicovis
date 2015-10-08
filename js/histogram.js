@@ -38,8 +38,8 @@ var Histogram = function(container, size, cmts, yParams, cParams, vlen, funcs, t
 	this.draw = function(){
 		var wd = size.w - margin.left - margin.right,
 			ht = size.h - margin.top - margin.bottom;
-		yParams = defval(yParams, Comments.params.hist.count);
-		cParams = defval(cParams, Comments.params.hist.volume);
+		yParams = defval(yParams, Comments.hist.params.count);
+		cParams = defval(cParams, Comments.hist.params.volume);
 		var hData = cmts.histogramLayout(bin, yParams, cParams);
 		console.log(hData);
 		var xScale = d3.scale.linear().domain([0, vlen]).range([0, wd]);

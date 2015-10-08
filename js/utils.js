@@ -63,6 +63,29 @@ function d3ColorScale(v){
 	return d3.rgb(c[0], c[1], c[2]);
 }
 
+function isNumber(x){
+	return (typeof(x) == 'number' /* || typeof(x) == 'string' */) && x == parseFloat(x) && isFinite(x);
+}
+
+function identity(x){
+	return x;
+}
+
+function isUndefined(obj){
+	return obj === undefined;
+}
+
+function optMap(obj, f){
+	if(isUndefined(obj)){
+		return obj;
+	}else{
+		return f(obj);
+	}
+}
+
+
+
+
 
 //////////////////////////////////////////
 // Drawing Helper

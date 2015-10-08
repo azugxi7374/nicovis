@@ -36,7 +36,7 @@ function init(){
 			function(f){d3.timer(f, 500)}
 		).draw();
 
-		_.each(Comments.params.pie, function(acs){
+		_.each(Comments.pie.params, function(acs){
 			new Pie(
 				getContainer().append("span"),
 				{w: 200, h: 200},
