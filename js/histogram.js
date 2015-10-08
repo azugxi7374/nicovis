@@ -22,11 +22,11 @@ var Histogram = function(container, size, cmts, yParams, cParams, vlen, funcs, t
 
 		back = g.append("rect").call(Drawing.rectAttr(wd, ht, [{"fill": "#808080"}]));
 		bars_g = g.append("g").attr("class", "bars");
-		tip = g.append("text");
 		curbar = Drawing.createBar(g, "curbar", ht);
 		pbar = Drawing.createBar(g, "pbar", ht);
 		over = g.append("rect").call(Drawing.rectAttr(wd, ht, [{"opacity": 0.0}]));
 		xAxis = g.append("g").attr("class", "x axis").call(Drawing.addTranslate(0, ht));
+		tip = Drawing.createTip(g);
 	}
 
 	// TODO
@@ -81,10 +81,12 @@ var Histogram = function(container, size, cmts, yParams, cParams, vlen, funcs, t
 				var d = dAcs(x);
 				pbar.show(true);
 				pbar.move(x);
+				tip([d.time, ~~yParams.acs(d), ~~cParams.acs(d)].join("/"))
+				/*
 				tip.attr("x", x).attr("y", 0).attr("fill", "#ffffff")
 					.text(
 						[d.time, ~~yParams.acs(d), ~~cParams.acs(d)].join("/")
-					);
+					);*/
 			},
 			"mouseout" : function(){
 				pbar.show(false);

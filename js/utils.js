@@ -133,6 +133,18 @@ var Drawing = new function(){
 			}
 		};
 	}
+	this.createTip = function(par, cls){
+		var tip = par.append("text").attr("class", cls).attr("fill", "#101010")
+		return {
+			set: function(s){
+				var xy = d3.mouse(par.node());
+				tip.attr("x", xy[0]).attr("y", xy[1]).text(s)
+			},
+			show: function(b){
+				bar.style("opacity", b ? 1.0 : 0.0);
+			}
+		}
+	}
 }
 
 
