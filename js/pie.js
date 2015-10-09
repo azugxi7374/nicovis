@@ -23,46 +23,55 @@ var Pie = function(container, size, cmts, acs){
 		});
 		console.log(pData);
 
+		setTimeout(function(){
+			_.each(pData, function(o){
+				o.padAngle = 0.5;
+			});
+		}, 1000);
+
 		var palette = Constant.piePalette;
 
 		// set dom
 		container.html("");
-		var svg = container.append("svg").attr("width", size.w).attr("height", size.h)
+		var svg = container.append("svg").attr("width", size.w).attr("height", size.h).attr("id", _.uniqueId("svg_"));
 		var back = svg.append("rect").call(
-			Drawing.rectAttr(0,0, size.w, size.h, [{"fill": "#a0a0a0"}])
+			Drawing.rectAttr(0,0, size.w, size.h, {"fill": "#a0a0a0"})
 		);
 		var g = svg.append("g").call(Drawing.addTranslate(cx, cy));
-		var title = g.append("text")
+			var title = Drawing.createLabel(g, 0, 10)
 
-		var data_g = g.selectAll("g").data(pData).enter().append("g")
+		var data_g = g.selectAll("g .data").data(pData).enter().append("g").attr("class", "data")
 
-		var tip = Drawing.createTip(svg, g, "tip");
-		//var over = g.append("rect").style("opacity", 0);
+		var tip = Drawing.createTip(svg.node(), g.node());
 
 		var paths = data_g.append("path").attr("d", arc).style("fill", function(d, i) { return palette(d.data.color); })
 
-		var labels = data_g.append("text")
-			.attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
-			.attr("dy", ".35em")
-			.style("text-anchor", "middle")
-			.text(function(d) {return d.data.disp; })
-			.call(Drawing.setOpacity(function(d){return d.data.rate < 0.1 ? 0 : 1}));
+		var labels = Drawing.createLabel(data_g, 0, 2,
+				{"fill": "#404040", "font-size": "x-small"},
+				{"fill": "#ffffff", "opacity": 0.75}
+			).set(function(d) {return d.data.disp;}, 0, 0)
+			.g.call(Drawing.addTranslate(function(d) { return arc.centroid(d)}))
+				.call(Drawing.setOpacity(function(d){return d.data.rate < 0.03? 0: 1}));
 
-		var over = g.append("g").selectAll("path").data(pData).enter().append("path").attr("d", arc).style("opacity", 0)
+		title.style(
+			{"fill": "#ffffff", "font-size": "medium", "font-weight" : "bold"},
+			{"fill": "#404040", "opacity": 0.75}
+		).set(acs.name,0,0)
+		.g.call(Drawing.addTranslate(0,0))
+
+		var over = g.append("g").attr("class", "over").selectAll("path").data(pData).enter().append("path").attr("d", arc).style("opacity", 0)
 		.on("mousemove", function(d){
 			//console.log("move");
-			tip.show(true);
-			tip.set([d.data.disp, numeral(d.data.rate).format("0.0%")].join("/"))
+			tip.show(true)
+				.set([d.data.disp, numeral(d.data.rate).format("0.0%"), d.data.count+"件"].join("/"))
 		}).on("mouseon", function(d){
 			//console.log("on");
-			tip.show(true);
-			tip.set(d.data.disp)
+			tip.show(true)
+				.set(d.data.disp)
 		}).on("mouseout", function(d){
 			//console.log("out");
 			tip.show(false);
 		});
-		title.call(Drawing.addTranslate(0,0))
-			.attr("dy", ".35em").style("text-anchor", "middle").text(acs.name);
 
 	};
 }

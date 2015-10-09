@@ -93,14 +93,7 @@ var Drawing = new function(){
 
 	this.rectAttr = function(x, y, w, h, styles){
 		return function(s){
-			return s.attr("x", x).attr("y", y).attr("width", w).attr("height", h)
-				.call(function(s){
-					_.each(defval(styles, []), function(obj){
-						_.each(obj, function(v,k){
-							s = s.style(k,v);
-						});
-					});
-				});
+			return s.attr("x", x).attr("y", y).attr("width", w).attr("height", h).style(defval(styles, {}));
 		};
 	};
 
@@ -132,43 +125,95 @@ var Drawing = new function(){
 			}
 		};
 	}
-	this.createTip = function(svg, par, cls){
+	this.createTip = function(svg_node, par_node){
+		var obj = {};
 		var m = 5;
-		var rect = par.append("rect").call(this.rectAttr(0, 0, 0, 0, [{"fill": "white"}]))
-			.attr("rx", 10).attr("ry", 10);
-		var text = par.append("text").attr("class", cls).attr("fill", "#101010")//.style("text-anchor", "middle")
-		return {
-			set: function(s){
-				var mxy = d3.mouse(par.node());
-				var x = mxy[0], y = mxy[1];
-				var sxy = d3.mouse(svg.node());
-				var sdx = sxy[0] - x, sdy = sxy[1] - y;
+		var label = self.createLabel(d3.select(par_node), 1, m, {"fill": "#101010", "font-size": "x-small"}, {"fill": "white"});
 
-				text.text(s)
-
-				var svgW = svg.node().offsetWidth, svgH = svg.node().offsetHeight;
-				var w = text.node().offsetWidth, h = text.node().offsetHeight;
-				var rw = w + 2 * m, rh = h + 2 * m;
-				var rx = x, ry = y - h - 2 * m;
-				var tx = x + m, ty = y - h * 0.33 - m;
-				rect.attr("width", rw).attr("height", rh);
-
-				var off = [[0, 0],[0, rh],[-rw, 0],[-rw, rh]];
-				var xy = _.find(off, function(xy){
-					var x = rx + xy[0] + sdx, y = ry + xy[1] + sdy;
-					return 0 <= x && 0 <= y && x + rw <= svgW && y + rh <= svgH;
-				});
-				xy = defval(xy, _.first(off));
-				text.call(self.setXY(tx + xy[0], ty + xy[1]));
-				rect.call(self.setXY(rx + xy[0], ry + xy[1]));
-
-			},
-			show: function(b){
-				text.style("opacity", b ? 1 : 0.0);
-				rect.style("opacity", b ? 0.75 : 0.0);
-			}
+		function check(sdx, sdy){
+			var roff = $(label.rect.node()).offset();
+			var lx1 = roff.left, ly1 = roff.top;
+			var lx2 = lx1 + ~~label.rect.attr("width"), ly2 = ly1 + ~~label.rect.attr("height")
+			var sq = $(svg_node);
+			var sx1 = sq.offset().left, sy1 = sq.offset().top;
+			var sx2 = sx1 + sq.width(), sy2 = sy1 + sq.height();
+			return sx1 <= lx1 && lx2 <= sx2 && sy1 <= ly1 && ly2 <= sy2;
 		}
+
+		obj.set = function(s){
+			var mxy = d3.mouse(par_node);
+			label.set(s, mxy[0], mxy[1]);
+
+			_.some([1,2,3,4,0], function(pos){
+				label.pos(pos);
+				return check();
+			});
+			return obj;
+		};
+		obj.show = function(b){
+			label.g.style("opacity", b ? 1 : 0.0);
+			return obj;
+		};
+		return obj;
 	}
+	this.createLabel = function(par, pos, m, tStyles, rStyles){
+		var obj = {};
+		m = defval(m, 5);
+		pos = defval(pos, 0);
+		var g = par.append("g");
+		var rect = g.append("rect").attr("rx", Math.min(m, 10)).attr("ry", Math.min(m, 10)).style(rStyles);
+		var text = g.append("text").attr("dy", ".35em").style("text-anchor", "middle").style(tStyles)
+		var px = 0, py = 0;
+		function off(pos, rw, rh){
+			return [
+				[0,0],
+				[rw/2, -rh/2],
+				[-rw/2, -rh/2],
+				[rw/2, rh/2],
+				[-rw/2, rh/2],
+			][pos]
+		};
+		function move(x, y){
+			x = defval(x, px);
+			y = defval(y, py);
+			g.each(function(d){
+				var g = d3.select(this);
+				var text = g.select("text"), rect = g.select("rect");
+				var tw = text.node().offsetWidth, th = text.node().offsetHeight;
+				var rw = tw + 2 * m, rh = th + 2 * m;
+				var oxy = off(pos, rw, rh);
+
+				var tx = x, ty = y;
+				var rx = tx - tw/2 - m, ry = ty - th/2 - m;
+				text.call(self.setXY(tx + oxy[0], ty + oxy[1]));
+				rect.call(self.rectAttr(rx + oxy[0], ry + oxy[1], rw, rh))
+			});
+			px = x;
+			py = y;
+			return obj;
+		}
+		obj.set = function(s, x, y){
+			text.text(s)
+			move(x, y);
+			return obj;
+		};
+		obj.pos = function(_pos){
+			pos = _pos;
+			move();
+			return obj;
+		};
+		obj.style = function(tStyles, rStyles){
+			text.style(tStyles);
+			rect.style(rStyles);
+			return obj;
+		};
+		obj.g = g;
+		obj.rect = rect;
+		obj.text = text;
+		return obj;
+	};//
+
+
 	this.setOpacity = function(v){
 		return function(s){
 			return s.style("opacity", v);
