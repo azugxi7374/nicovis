@@ -22,7 +22,7 @@ var NicoPlayer = {
 
 				// message, command, vpos, resNo, date
 				getComments : function(num){
-					num = num || 1000;
+					num = num || 10000;
 					return player.ext_getComments(tid, num);
 				}
 			};

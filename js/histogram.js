@@ -7,8 +7,8 @@
 var Histogram = function(container, size, cmts, yParams, cParams, vlen, funcs, timer){
     this.ID = _.uniqueId();
 
-    var margin = {top: 0, right: 20, bottom: 30, left: 30};
-    var bin = 120;
+    var margin = {top: 10, right: 20, bottom: 30, left: 30};
+    var bin = (size.w - margin.left - margin.right)/3; 
 
     var /*back,*/ bars_g, over, tip, xAxis;
     var curbar, pbar;
