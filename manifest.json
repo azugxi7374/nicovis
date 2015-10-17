@@ -35,6 +35,7 @@
 				"js/comments.js",
 				"js/histogram.js",
 				"js/pie.js",
+			  	"js/main_view.js",
 			  	"js/content_scripts.js"
 			],
 			"css":[

@@ -1,58 +1,51 @@
 //var svgClass = "svg-nicovis";
 var containerID = "container-nicovis-1"
+var containerClass = "container-nicovis"
 function getContainer(){ return d3.select("#"+containerID)};
 function getPlayerContainerWrapper(){ return d3.select("#playerContainerWrapper")};
-var reset = init;
 
 function init(){
 	// container
 	console.log("init!");
+
 	var container = getContainer();
 	if(container.empty()){
-		container = getPlayerContainerWrapper().append("div").attr("id", containerID);
+		var w = getPlayerContainerWrapper().append("div");
+		var button = w.append("button")
+		container = w.append("div").attr("id", containerID).attr("class", containerClass);
+
+		w.foldFlg = 0;
+		function fold(flg){
+			container.style("display", [null, "none"][flg] );
+			var pm = ["-","+"][flg];
+			button.text("Nico-Vis "+["▲","▼"][flg]);
+		}
+		fold(w.foldFlg);
+		button.on("click", function(){
+			w.foldFlg = 1 - w.foldFlg;
+			fold(w.foldFlg);
+		});
 	}
 
 	// button, svg
-	clear();
-	container.append("button").html("reset").on("click", reset);
-	//container.append("svg");
+	container.html("");
 
   // nicoPlayer, graph
 	NicoPlayer.get().then(function(np){
-		var cmts = new Comments(np.getComments(), np.length);
 
-		new Histogram(
-			getContainer().append("div"),
-			{w:800, h:100},
-			cmts,
-			undefined,
-			undefined,
-			np.length,
-			{
-				getTime: np.getTime,
-				setTime: function(ms){np.setTime(~~ms)},
-				play: function(){np.play(true)},
-			},
-			function(f){d3.timer(f, 500)}
-		).draw();
-
-		_.each(Comments.pie.params, function(acs){
-			new Pie(
-				getContainer().append("span"),
-				{w: 200, h: 200},
-				cmts,
-				acs
-			).draw();
-		});
+		new MainView(container.node(),
+			function(){return new Comments(np.getComments(), np.length)},
+			function(){return {
+					getTime: np.getTime,
+					setTime: function(ms){np.setTime(~~ms)},
+					play: function(){np.play(true)},
+				};
+			}
+		);
 
 		disableAds();
 		chrome.runtime.sendMessage({message:"complete"});
 	});
-}
-
-function clear(){
-	console.log("clear!")
-	getContainer().html("");
 }
 
 

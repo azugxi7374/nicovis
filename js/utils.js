@@ -128,7 +128,7 @@ var Drawing = new function(){
 	this.createTip = function(svg_node, par_node){
 		var obj = {};
 		var m = 5;
-		var label = self.createLabel(d3.select(par_node), 1, m, {"fill": "#101010", "font-size": "x-small"}, {"fill": "white"});
+		var label = self.createLabel(d3.select(par_node), 1, m, "tip");//{"fill": "#101010", "font-size": "x-small"}, {"fill": "white"});
 
 		function check(sdx, sdy){
 			var roff = $(label.rect.node()).offset();
@@ -156,13 +156,13 @@ var Drawing = new function(){
 		};
 		return obj;
 	}
-	this.createLabel = function(par, pos, m, tStyles, rStyles){
+	this.createLabel = function(par, pos, m, cls){
 		var obj = {};
 		m = defval(m, 5);
 		pos = defval(pos, 0);
-		var g = par.append("g");
-		var rect = g.append("rect").attr("rx", Math.min(m, 10)).attr("ry", Math.min(m, 10)).style(rStyles);
-		var text = g.append("text").attr("dy", ".35em").style("text-anchor", "middle").style(tStyles)
+		var g = par.append("g").attr("class", cls);
+		var rect = g.append("rect").attr("rx", Math.min(m, 10)).attr("ry", Math.min(m, 10));
+		var text = g.append("text").attr("dy", ".35em").style("text-anchor", "middle");
 		var px = 0, py = 0;
 		function off(pos, rw, rh){
 			return [

@@ -7,31 +7,24 @@
 var Histogram = function(container, size, cmts, yParams, cParams, vlen, funcs, timer){
 	this.ID = _.uniqueId();
 
-	var margin = {top: 10, right: 30, bottom: 30, left: 30};
+	var margin = {top: 0, right: 0, bottom: 30, left: 30};
 	var bin = 120;
 
-	var back, bars_g, over, tip, xAxis;
+	var /*back,*/ bars_g, over, tip, xAxis;
 	var curbar, pbar;
 
 	function setDOM(ctn, wd, ht){
-		ctn.append("button").html("button1").on("click", button1);
-		ctn.append("button").html("button2").on("click", function(){console.log('button2_clicked')});
 
 		var svg = ctn.append("svg").attr("width", size.w).attr("height", size.h);
 		var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-		back = g.append("rect").call(Drawing.rectAttr(0,0, wd, ht, {"fill": "#808080"}));
+		//back = g.append("rect").call(Drawing.rectAttr(0,0, wd, ht, {"fill": "#808080"}));
 		bars_g = g.append("g").attr("class", "bars");
 		curbar = Drawing.createBar(g, "curbar", ht);
 		pbar = Drawing.createBar(g, "pbar", ht);
 		tip = Drawing.createTip(svg.node(), g.node(), "tip");
 		over = g.append("rect").call(Drawing.rectAttr(0,0, wd, ht, {"opacity": 0.0}));
 		xAxis = g.append("g").attr("class", "x axis").call(Drawing.addTranslate(0, ht));
-	}
-
-	// TODO
-	function button1(){
-		console.log("button1 clicked!");
 	}
 
 	// reset

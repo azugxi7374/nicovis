@@ -33,12 +33,9 @@ var Pie = function(container, size, cmts, acs){
 
 		// set dom
 		container.html("");
-		var svg = container.append("svg").attr("width", size.w).attr("height", size.h).attr("id", _.uniqueId("svg_"));
-		var back = svg.append("rect").call(
-			Drawing.rectAttr(0,0, size.w, size.h, {"fill": "#a0a0a0"})
-		);
+		var svg = container.append("svg").attr("width", size.w).attr("height", size.h).attr("class", "pie").attr("id", _.uniqueId("svg_"));
 		var g = svg.append("g").call(Drawing.addTranslate(cx, cy));
-			var title = Drawing.createLabel(g, 0, 10)
+			var title = Drawing.createLabel(g, 0, 10, "title")
 
 		var data_g = g.selectAll("g .data").data(pData).enter().append("g").attr("class", "data")
 
@@ -46,17 +43,11 @@ var Pie = function(container, size, cmts, acs){
 
 		var paths = data_g.append("path").attr("d", arc).style("fill", function(d, i) { return palette(d.data.color); })
 
-		var labels = Drawing.createLabel(data_g, 0, 2,
-				{"fill": "#404040", "font-size": "x-small"},
-				{"fill": "#ffffff", "opacity": 0.75}
-			).set(function(d) {return d.data.disp;}, 0, 0)
-			.g.call(Drawing.addTranslate(function(d) { return arc.centroid(d)}))
+		var labels = Drawing.createLabel(data_g, 0, 2, "label").set(function(d) {return d.data.disp;}, 0, 0);
+        labels.g.call(Drawing.addTranslate(function(d) { return arc.centroid(d)}))
 				.call(Drawing.setOpacity(function(d){return d.data.rate < 0.03? 0: 1}));
 
-		title.style(
-			{"fill": "#ffffff", "font-size": "medium", "font-weight" : "bold"},
-			{"fill": "#404040", "opacity": 0.75}
-		).set(acs.name,0,0)
+		title.set(acs.name,0,0)
 		.g.call(Drawing.addTranslate(0,0))
 
 		var over = g.append("g").attr("class", "over").selectAll("path").data(pData).enter().append("path").attr("d", arc).style("opacity", 0)

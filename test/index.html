@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="../css/style.css">
 </head>
 <body>
-<div id="container-nicovis-1"></div>
+<div id="container-nicovis-1" class="container-nicovis"></div>
 
 
 <script type="text/javascript" src="../js/lib/jquery-2.1.4.min.js"></script>
@@ -21,39 +21,21 @@
 <script type="text/javascript" src="../js/comments.js"></script>
 <script type="text/javascript" src="../js/histogram.js"></script>
 <script type="text/javascript" src="../js/pie.js"></script>
+<script type="text/javascript" src="../js/main_view.js"></script>
 
 <script type="text/javascript" src="./sm9.js"></script>
 <script type="text/javascript">
-    function getContainer(){ return d3.select("#container-nicovis-1")};
+	var container = d3.select("#container-nicovis-1");
 
-    var cmts = new Comments(cmts, videoLen);
-
-
-    new Histogram(
-			getContainer().append("div"),
-			{w:800, h:100},
-			cmts,
-			undefined,
-			undefined,
-			videoLen,
-			{
-				getTime: function(){return 0},
-				setTime: identity,
-				play: identity,
-			},
-			function(f){d3.timer(f, 500)}
-		).draw();
-
-		_.each(Comments.pie.params, function(acs){
-			new Pie(
-				getContainer().append("span"),
-				{w: 200, h: 200},
-				cmts,
-				acs
-			).draw();
-		});
-
-
+	new MainView(container.node(),
+			function(){return new Comments(cmts, videoLen)},
+			function(){return {
+					getTime: function(){return 0},
+					setTime: identity,
+					play: identity,
+				}
+			}
+		);
 
 
 
