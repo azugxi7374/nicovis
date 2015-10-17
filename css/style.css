@@ -15,6 +15,9 @@
 	/* fill: steelblue;*/
 	shape-rendering: crispEdges;
 }
+.container-nicovis .caxis {
+	shape-rendering: crispEdges; 
+}
 
 .curbar{
 	stroke: #afa;
