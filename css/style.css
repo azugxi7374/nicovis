@@ -10,19 +10,26 @@
 }
 
 
-
-.bar rect {
+/** histogram **/
+.bars rect {
 	/* fill: steelblue;*/
 	shape-rendering: crispEdges;
+}
+.bars.overlay * {
+    opacity: 0;
+}
+.bars.overlay .current {
+    fill: #fff;
+    opacity: 0.25;
 }
 .container-nicovis .caxis {
 	shape-rendering: crispEdges; 
 }
 
 .curbar{
-	stroke: #afa;
+	stroke: #ffd;
     stroke-width: 2;
-    opacity: 0.5;
+    opacity: 0.75;
 }
 .pbar{
 	stroke: #ddf;

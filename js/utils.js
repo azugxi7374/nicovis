@@ -120,14 +120,18 @@ var Drawing = new function(){
     }
 
     this.createBar = function(par, cls, height){
-        var bar = par.append("line").attr("class", cls).attr("y1", 0).attr("y2", height);
+        var bar = par.append("line").attr("class", cls).attr("y1", 0).attr("y2", defval(height, 0));
+
         return {
             move: function(x){
                 bar.attr("x1", x).attr("x2", x)
             },
             show: function(b){
                 bar.style("opacity", b ? 1.0 : 0.0);
-            }
+            },
+            height: function(ht){
+                bar.attr("y2", ht);
+            },
         };
     }
     this.createTip = function(svg_node, par_node){

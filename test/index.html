@@ -27,13 +27,13 @@
 <script type="text/javascript">
 	var container = d3.select("#container-nicovis-1");
 
-	new MainView(container.node(),
-			function(){return new Comments(cmts, videoLen)},
-			function(){return {
+	new MainView(container.node())
+        .draw(
+			new Comments(cmts, videoLen),
+			{
 					getTime: function(){return 0},
 					setTime: identity,
 					play: identity,
-				}
 			}
 		);
 

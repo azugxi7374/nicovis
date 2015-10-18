@@ -1,36 +1,44 @@
-var MainView = function(par_node, getComments, getPlayer){
+var MainView = function(par_node){
 
-	var par = d3.select(par_node);
-	var cmts, player;
-	var graphs;
+    var par;
+    var cmts, player;
+    var hist, pies;
 
-	reset();
+    init();
 
-	function reset(){
-		cmts = getComments();
-		player = getPlayer();
+    function init(){
+        par = d3.select(par_node);
+        par.html("");
 
-		par.html("");
-		par.append("button").html("reset").on("click", reset);
+        hist = new Histogram(
+                par.append("div"),
+                {w:800, h:200},
+                Comments.hist.params.count,
+                Comments.hist.params.volume,
+                Constant.Timer500 
+                );
 
-		new Histogram(
-			par.append("div"),
-			{w:800, h:200},
-			cmts,
-			undefined,
-			undefined,
-			cmts.videoLen,
-			player,
-			function(f){d3.timer(f, 500)}
-		).draw();
+        pies = _.map(Comments.pie.params, function(acs){
+            return new Pie(
+                    par.append("span"),
+                    {w: 200, h: 200},
+                    acs
+                    );
+        });
 
-		_.each(Comments.pie.params, function(acs){
-			new Pie(
-				par.append("span"),
-				{w: 200, h: 200},
-				cmts,
-				acs
-			).draw();
-		});
-	}
+    }
+
+    this.draw = function(cmts, player){
+
+        hist.draw(
+                cmts,
+                player
+                );
+
+        _.each(pies, function(pie){
+            pie.draw(
+                    cmts
+                    );
+        });
+    }
 }

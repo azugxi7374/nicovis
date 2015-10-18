@@ -4,130 +4,144 @@
 // y,c : acs, min, max
 // vlen
 // funcs : getTime, setTime, play
-var Histogram = function(container, size, cmts, yParams, cParams, vlen, funcs, timer){
-    this.ID = _.uniqueId();
+var Histogram = function(container, size, yParams, cParams, timer){
+    // this.ID = _.uniqueId();
 
-    var margin = {top: 10, right: 20, bottom: 30, left: 30};
-    var bin = (size.w - margin.left - margin.right)/3; 
-
-    var /*back,*/ bars_g, over, tip, xAxis;
-    var curbar, pbar;
-
-    function setDOM(ctn, wd, ht){
-
-        var svg = ctn.append("svg").attr("width", size.w).attr("height", size.h);
-        var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        //back = g.append("rect").call(Drawing.rectAttr(0,0, wd, ht, {"fill": "#808080"}));
-        bars_g = g.append("g").attr("class", "bars");
-        curbar = Drawing.createBar(g, "curbar", ht);
-        pbar = Drawing.createBar(g, "pbar", ht);
-        tip = Drawing.createTip(svg.node(), g.node(), "tip");
-        over = g.append("rect").call(Drawing.rectAttr(0,0, wd, ht, {"opacity": 0.0}));
-        xAxis = g.append("g").attr("class", "x axis").call(Drawing.addTranslate(0, ht));
-        cAxis = svg.append("g").attr("class", "c-axis");
+    var cAxisCount = 32;
+    var margin = {left: 30, right: 30, top: 30, bottom: 30};
+    var getBin = function(){
+        return (size.w - margin.left - margin.right)/3; 
     }
 
-    // reset
-    this.draw = function(){
-        var wd = size.w - margin.left - margin.right,
-        ht = size.h - margin.top - margin.bottom;
-        yParams = defval(yParams, Comments.hist.params.count);
-        cParams = defval(cParams, Comments.hist.params.volume);
-        var hData = cmts.histogramLayout(bin, yParams, cParams);
-        console.log(hData);
-        var xScale = d3.scale.linear().domain([0, vlen]).range([0, wd]);
-        var yScale = d3.scale.linear().domain([0, 1]).range([ht, 0]);
-        var xInvScale = d3.scale.linear().domain([0, wd]).range([0, vlen]);
+    var svg, bars, overs, tip, xAxis, cAxis;
+    var curbar;
+    var xScale, yScale, cAxisYScale;
 
-        container.html("");
-        setDOM(container, wd, ht);
+    init();
 
-        // color bar
-        bars_g.selectAll(".bar").data(hData).enter().append("g").attr("class", "bar")
-            .append("rect").call(Drawing.rectAttr(
-                        function(d){return xScale(d.x)}, function(d){return yScale(d.y)},
-                        xScale(hData[0].dx), function(d) { return ht - yScale(d.y); }, {"fill": function(d){return Constant.spectral(d.c)}})
-                    )//.call(
-                    //Drawing.addTranslate(function(d){return [xScale(d.x), yScale(d.y)]}));
+    function init(){
+        // container.html("");
 
-                    // overlay bar
-            var dAcs = function(x){ return searchData(hData, xInvScale(x))}
-        _.each(actions(over, dAcs, tip, pbar), function(v,k){
-            over = over.on(k, v);
+        svg = container.append("svg");
+        var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var g_bars = g.append("g").attr("class", "bars");
+        bars = function(){ return g_bars.selectAll("rect");};
+        curbar = Drawing.createBar(g, "curbar");
+        // pbar = Drawing.createBar(g, "pbar");
+        tip = Drawing.createTip(svg.node(), g.node(), "tip");
+        var g_overs = g.append("g").attr("class", "bars overlay");
+        overs = function(){ return g_overs.selectAll("rect");};
+        xAxis = g.append("g").attr("class", "x axis");
+        cAxis = svg.append("g").attr("class", "c-axis")
+            .selectAll(".caxis").data(_.map(_.range(cAxisCount), function(i){
+                return 1- i/cAxisCount
+            })).enter()
+        .append("rect").attr("class", ".caxis")
+            .style("fill", function(v){ return Constant.spectral(v)});
+
+
+        xScale = d3.scale.linear();
+        yScale = d3.scale.linear();
+        cAxisYScale = d3.scale.linear();
+    }
+
+    this.draw = function(cmts, player){
+        update(size, cmts, player);
+    }
+
+    function drawBars(player){
+        bars().attr({
+            x: function(d){return xScale(d.x)}, 
+            y: yScale(0), 
+            width: function(d){return xScale(d.dx)},
+            height: 0,
+            fill: function(d){return Constant.spectral(d.c)}});
+        bars().transition().duration(Constant.drawDuration).attr({
+            y: function(d){return yScale(d.y)},
+            height: function(d) { return yScale(0) - yScale(d.y); },
         });
 
-        // xAxis
-        xAxis.call(d3.svg.axis().scale(xScale).tickFormat(function(d){return ms2str(d)}).orient("bottom"));
+        overs().attr({
+            x: function(d){return xScale(d.x)}, 
+            y: 0, 
+            width: function(d){return xScale(d.dx)},
+            height: yScale(0) 
+        }).call(function(s){
+            _.each(actions(tip, player), function(v,k){
+                s.on(k, v);
+            });
+        });
 
-        // 再生位置監視
-        // TODO 重い
-        timer(function(){
-            curbar.move(xScale(~~funcs.getTime()))
+    }
+
+    function _bind(cmts){
+        var data = cmts.histogramLayout(getBin(), yParams, cParams);
+        console.log(data);
+        _.each([bars(), overs()], function(bs){
+            var bd = bs.data(data);
+            bd.exit().remove();
+            bd.enter().append("rect");
+        });
+    }
+
+    // draw
+    function update(_size, cmts, player){
+        size = _size;
+        var wd = size.w - margin.left - margin.right;
+        var ht = size.h - margin.top - margin.bottom;
+        var vlen = cmts.videoLen;
+
+        xScale.domain([0, vlen]).range([0, wd]);
+        yScale.domain([0, 1]).range([ht, 0]);
+
+        svg.attr("width", size.w).attr("height", size.h);
+
+        xAxis.call(Drawing.addTranslate(0, ht))
+            .call(d3.svg.axis().scale(xScale).tickFormat(function(d){return ms2str(d)}).orient("bottom"));
+
+        _bind(cmts);
+        drawBars(player);
+
+        // pbar.height(ht);
+        curbar.height(ht);
+        timer.add("hist", function(){
+            curbar.move(xScale(~~player.getTime()))
         });
 
         // 右側のバー
-        var cAxisCount = 32;
-        var cAxisYScale = d3.scale.linear()
-            .domain([0,1]).range([size.h - margin.bottom, margin.top]);
-        cAxis.selectAll(".caxis")
-            .data(_.map(_.range(cAxisCount), function(i){return 1- i/cAxisCount})).enter()
-            .append("rect").attr("class", ".caxis")
-            .call(Drawing.rectAttr(
-                        size.w - margin.right, 
-                        cAxisYScale,
-                        margin.right,
-                        Math.ceil((size.h - margin.top - margin.bottom)/ cAxisCount),
-                        {"fill": function(v){ return Constant.spectral(v);}}));
+        cAxisYScale.domain([0,1]).range([size.h - margin.bottom, margin.top]);
+        cAxis.attr({
+            x: size.w - margin.right, 
+        y: cAxisYScale,
+        width: margin.right,
+        height: Math.ceil((size.h - margin.top - margin.bottom)/ cAxisCount)
+        });
     }
 
     // actions
-    function actions(ctn, dAcs, tip, pbar){
-        function getX(){ return d3.mouse(ctn.node())[0]};
+    function actions(tip, player){
         return {
-            "mousemove" : function(){
-                var x = getX();
-                var d = dAcs(x);
-                pbar.show(true);
-                pbar.move(x);
+            "mousemove" : function(d){
+                d3.select(this).classed("current", true);
                 tip.show(true).set([d.time, ~~yParams.acs(d), ~~cParams.acs(d)].join("/"))
             },
             "mouseout" : function(){
-                pbar.show(false);
+                d3.select(this).classed("current", false);
                 tip.show(false);
             },
-            "click" : function(){
-                funcs.setTime(dAcs(getX()).x);
+            "click" : function(d){
+                player.setTime(d.x);
             },
             // TODO
             "drag" : function(){
-                console.log("drag!!", getX());
-                //funcs.setTime(d.x);
+                console.log("drag!!");
             },
             "dblclick" : function(){
-                funcs.play();
+                player.play();
             }
         }
     }
 
-    // searchData
-    function searchData(hist, ms){
-        var idx = Math.max(0, _.sortedIndex(hist, {x: ms}, 'x') -1);
-        return hist[idx];
-    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //

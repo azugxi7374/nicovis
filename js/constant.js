@@ -1,5 +1,6 @@
 var Constant = new function(){
 
+    this.drawDuration = 1000;
 
     function makeColors(category){
         var color = category();
@@ -61,10 +62,20 @@ var Constant = new function(){
     }
 
 
+    this.Timer500 = new function(){
+        var set = {};
+        
+        this.add = function(id, f){
+            set[id] = f;
+        };
 
-
-
-
+        d3.timer(function(){
+            _.each(set, function(v, k){
+                v();
+            });
+            return false;
+        });
+    }
 }
 //
 //
