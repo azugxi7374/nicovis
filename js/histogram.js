@@ -24,6 +24,7 @@ var Histogram = function(container, size, yParams, cParams, timer){
 
         svg = container.append("svg");
         var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var g_axis = g.append("g").classed("axis", true);
 
         var g_bars = g.append("g").attr("class", "bars");
         bars = function(){ return g_bars.selectAll("rect");};
@@ -32,8 +33,9 @@ var Histogram = function(container, size, yParams, cParams, timer){
         tip = Drawing.createTip(svg.node(), g.node(), "tip");
         var g_overs = g.append("g").attr("class", "bars overlay");
         overs = function(){ return g_overs.selectAll("rect");};
-        xAxis = g.append("g").attr("class", "x axis");
-        cAxis = svg.append("g").attr("class", "c-axis")
+
+        xAxis = g_axis.append("g").attr("class", "x-axis");
+        cAxis = g_axis.append("g").attr("class", "c-axis")
             .selectAll(".caxis").data(_.map(_.range(cAxisCount), function(i){
                 return 1- i/cAxisCount
             })).enter()
@@ -110,12 +112,12 @@ var Histogram = function(container, size, yParams, cParams, timer){
         });
 
         // 右側のバー
-        cAxisYScale.domain([0,1]).range([size.h - margin.bottom, margin.top]);
+        cAxisYScale.domain([0,1]).range([ht, 0]);
         cAxis.attr({
-            x: size.w - margin.right, 
-        y: cAxisYScale,
-        width: margin.right,
-        height: Math.ceil((size.h - margin.top - margin.bottom)/ cAxisCount)
+            x: wd,
+            y: cAxisYScale,
+            width: margin.right -10,
+            height: Math.ceil((size.h - margin.top - margin.bottom)/ cAxisCount)
         });
     }
 

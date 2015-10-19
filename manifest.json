@@ -31,6 +31,7 @@
 			  	"js/lib/numeral.min.js",
 				"js/utils.js",
 			  	"js/constant.js",
+                "js/style.js",
 				"js/nico_player.js",
 				"js/comments.js",
 				"js/histogram.js",

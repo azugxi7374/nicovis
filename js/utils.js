@@ -118,6 +118,7 @@ var Drawing = new function(){
             return s.attr("transform", f);
         }
     }
+    this.trans = this.addTranslate;
 
     this.createBar = function(par, cls, height){
         var bar = par.append("line").attr("class", cls).attr("y1", 0).attr("y2", defval(height, 0));
@@ -135,36 +136,41 @@ var Drawing = new function(){
         };
     }
     this.createTip = function(svg_node, par_node){
-        var obj = {};
-        var m = 5;
-        var label = self.createLabel(d3.select(par_node), 1, m, "tip");//{"fill": "#101010", "font-size": "x-small"}, {"fill": "white"});
+        var m = Style.tip_m;
+        var label = self.Label.create(d3.select(par_node), "tip", 1, m);
 
-        function check(sdx, sdy){
+        function check(){
             var roff = $(label.rect.node()).offset();
             var lx1 = roff.left, ly1 = roff.top;
-            var lx2 = lx1 + ~~label.rect.attr("width"), ly2 = ly1 + ~~label.rect.attr("height")
-                var sq = $(svg_node);
+            var lx2 = lx1 + ~~label.rect.attr("width"), ly2 = ly1 + ~~label.rect.attr("height");
+            var sq = $(svg_node);
             var sx1 = sq.offset().left, sy1 = sq.offset().top;
             var sx2 = sx1 + sq.width(), sy2 = sy1 + sq.height();
+
+            // console.log([sx1, sx2, sy1, sy2], [lx1, lx2, ly1, ly2]);
             return sx1 <= lx1 && lx2 <= sx2 && sy1 <= ly1 && ly2 <= sy2;
-        }
-
-        obj.set = function(s){
-            var mxy = d3.mouse(par_node);
-            label.set(s, mxy[0], mxy[1]);
-
-            _.some([1,2,3,4,0], function(pos){
-                label.pos(pos);
-                return check();
-            });
-            return obj;
         };
-        obj.show = function(b){
-            label.g.style("opacity", b ? 1 : 0.0);
-            return obj;
+
+        return {
+            set : function(s){
+                var mxy = d3.mouse(par_node);
+                label.set(s);
+                label.g.call(D.trans(mxy[0], mxy[1]));
+
+                _.some([1,2,3,4,0], function(pos){
+                    label.pos(pos);
+                    return check();
+                });
+                return this;
+            },
+            show : function(b){
+                label.g.style("opacity", b ? 1 : 0.0);
+                return this;
+            },
         };
-        return obj;
-    }
+    };
+
+    /*
     this.createLabel = function(par, pos, m, cls){
         var obj = {};
         m = defval(m, 5);
@@ -185,7 +191,7 @@ var Drawing = new function(){
         function move(x, y){
             x = defval(x, px);
             y = defval(y, py);
-            g.each(function(d){
+            g.each(function(){
                 var g = d3.select(this);
                 var text = g.select("text"), rect = g.select("rect");
                 var tw = text.node().offsetWidth, th = text.node().offsetHeight;
@@ -221,6 +227,85 @@ var Drawing = new function(){
         obj.text = text;
         return obj;
     };//
+    */
+
+
+    this.Label = new function(){
+        function getV(g, p){
+            return g.select("_data").attr(p);
+        }
+        function setV(g, p, v){
+            if(isUndefined(v)){
+                g.select("_data").attr(p);
+            }else{
+                g.select("_data").attr(p, v);
+            }
+        }
+        function off(pos, rw, rh){
+            return [
+                [0,0],
+                [rw/2, -rh/2],
+                [-rw/2, -rh/2],
+                [rw/2, rh/2],
+                [-rw/2, rh/2],
+            ][pos]
+        }
+        function adjust(_g){
+            _g.each(function(){
+                var g = d3.select(this);
+                var text = g.select("text");
+                var rect = g.select("rect");
+
+                var pos = ~~getV(g, "pos");
+                var m = ~~getV(g, "m");
+
+                var tw = text.node().clientWidth, th = text.node().clientHeight;
+                var rw = tw + 2 * m, rh = th + 2 * m;
+                var oxy = off(pos, rw, rh);
+
+                var tx = oxy[0], ty = oxy[1];
+                var rx = tx - tw/2 - m, ry = ty - th/2 - m;
+                text.call(self.setXY(tx, ty));
+                rect.call(self.rectAttr(rx, ry, rw, rh))
+            });
+        };
+
+        this.toLabel = function(g){
+            var rect = g.select("rect");
+            var text = g.select("text");
+            return {
+                set : function(s){
+                    text.text(s);
+                    adjust(g);
+                    return this;
+                },
+                pos : function(pos){
+                    setV(g, "pos", pos);
+                    adjust(g);
+                    return this;
+                },
+                g : g,
+                rect : rect,
+                text : text,
+            };
+        }
+
+        this.create = function(par, cls, pos, m){
+            pos = defval(pos, 0);
+            cls = defval(cls, "");
+            m = defval(m, 2);
+            var g = par.append("g").classed(cls, true);
+
+            g.append("rect").attr("rx", Math.min(m, 10)).attr("ry", Math.min(m, 10));
+            g.append("text").attr("dy", ".35em").style("text-anchor", "middle");
+            g.append("_data");
+            setV(g, {
+                pos: pos,
+                m: m,
+            });
+            return this.toLabel(g);
+        };
+    }
 
 
     this.setOpacity = function(v){
@@ -234,7 +319,7 @@ var Drawing = new function(){
         }
     }
 }
-
+var D = Drawing;
 
 
 

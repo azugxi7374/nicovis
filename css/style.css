@@ -20,7 +20,7 @@
 }
 .bars.overlay .current {
     fill: #fff;
-    opacity: 0.25;
+    opacity: 0.75;
 }
 .container-nicovis .caxis {
 	shape-rendering: crispEdges; 
@@ -41,13 +41,15 @@
 /**  axis  **/
 .container-nicovis .axis text{
 	fill: #fff;
-	font-size: x-small;
+	font-size: small;
 }
 .container-nicovis .axis path, .container-nicovis .axis line {
 	fill: none;
 	stroke: #fff;
 	shape-rendering: crispEdges;
 }
+
+
 
 /** labels **/
 .container-nicovis .pie .label rect {
@@ -59,17 +61,17 @@
     font-size: x-small;
 }
 .container-nicovis .pie .title rect {
-    fill: #555;
-    opacity: 0.75;
+    fill: #222;
+    opacity: 1;
 }
 .container-nicovis .pie .title text {
     fill: #fff;
-    font-size: medium;
-    font-weight: bold;
+    font-size: small;
+    /*font-weight: bold;*/
 }
 .container-nicovis .tip rect {
     fill: #ddf;
-    opacity: 0.75;
+    opacity: 0.8;
 }
 .container-nicovis .tip text {
     fill: #222;
