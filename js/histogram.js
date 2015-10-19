@@ -8,7 +8,7 @@ var Histogram = function(container, size, yParams, cParams, timer){
     // this.ID = _.uniqueId();
 
     var cAxisCount = 32;
-    var margin = {left: 30, right: 30, top: 30, bottom: 30};
+    var margin = Style.hist_margin;
     var getBin = function(){
         return (size.w - margin.left - margin.right)/3; 
     }
@@ -99,8 +99,20 @@ var Histogram = function(container, size, yParams, cParams, timer){
 
         svg.attr("width", size.w).attr("height", size.h);
 
-        xAxis.call(Drawing.addTranslate(0, ht))
-            .call(d3.svg.axis().scale(xScale).tickFormat(function(d){return ms2str(d)}).orient("bottom"));
+        xAxis.call(D.trans(0, ht))
+            .call(
+                    d3.svg.axis().scale(
+                        d3.scale.linear().domain([0, vlen/ 1000/ 60]).range([0, wd]))
+                    .tickFormat(function(d){return ms2str(d*1000*60)})
+                    .innerTickSize(-ht)
+                    .outerTickSize(0)
+                    .orient("bottom")
+                 );
+        xAxis.selectAll("text").attr({
+            x: "2em",
+            y: "0em",
+            transform: "translate(0, 0) rotate(45)",
+        });
 
         _bind(cmts);
         drawBars(player);

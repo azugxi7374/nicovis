@@ -39,16 +39,18 @@
 
 
 /**  axis  **/
-.container-nicovis .axis text{
+.container-nicovis .x-axis text{
 	fill: #fff;
-	font-size: small;
+	font-size: x-small;
 }
-.container-nicovis .axis path, .container-nicovis .axis line {
+.x-axis path, .x-axis line {
 	fill: none;
 	stroke: #fff;
 	shape-rendering: crispEdges;
 }
-
+.x-axis .tick line {
+    opacity: 0.5;
+}
 
 
 /** labels **/
