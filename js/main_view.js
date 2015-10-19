@@ -13,8 +13,8 @@ var MainView = function(par_node){
         hist = new Histogram(
                 par.append("div"),
                 {w:800, h:200},
-                Comments.hist.params.count,
-                Comments.hist.params.volume,
+                Comments.hist.params.viscome,
+                Comments.hist.params.danmaku,
                 Constant.Timer500 
                 );
 
